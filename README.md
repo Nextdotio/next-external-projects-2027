@@ -70,12 +70,31 @@ of these with us across four cities"). Get written permission before naming anyo
 
 ## Indicative investment — read before sending this to anyone
 
-The format cards, the brief builder and both printouts show an indicative "from" band.
-Those bands are derived from the delivered-event history in the deck (≈€90k average
-client spend; €139k and €58k averages for the two main hosts; a €50k standard build
-cited as a good deal), laid out across the six formats. **They are not an approved price
-list**, and Appendix B is explicit that the point is faster quoting, "not a published
-price list".
+Every figure on the page is **tied to a guest count**. A single "from" number invites
+the reading that a drinks reception costs €35k whether sixty people come or a hundred
+and twenty, which is wrong and would have been discovered in the first quote.
+
+Each format is a fixed **base** (venue, production, staffing, branding, guest list) plus
+a **per-guest rate** (food, drink, kit, transfers). The bases are set so
+`base + perGuest × min` reproduces that format's entry price:
+
+| Format | Base | Per guest | Range |
+| --- | --- | --- | --- |
+| Drinks Reception | €24,200 | €180 | €35k @ 60 → €46k @ 120 |
+| Private Dinner | €36,000 | €450 | €45k @ 20 → €54k @ 40 |
+| Private Lounge | €39,000 | €200 | €55k @ 80 → €79k @ 200 |
+| Hospitality Day | €50,500 | €650 | €70k @ 30 → €103k @ 80 |
+| VIP Side Event | €50,500 | €230 | €85k @ 150 → €120k @ 300 |
+| Flagship Build | — | — | Quoted on brief |
+
+Displayed figures are a ±8% band rounded to the nearest €1,000, because Appendix B says
+that where the data is thin the quote shows a range. The **off-calendar** slot adds a
+**30% premium** on top (`premium` on that `SUMMITS` entry).
+
+These are derived from the delivered-event history in the deck (≈€90k average client
+spend; €139k and €58k averages for the two main hosts; a €50k standard build cited as a
+good deal). **They are not an approved price list**, and Appendix B is explicit that the
+point is faster quoting, "not a published price list".
 
 One flag controls all of it — `SHOW_INVESTMENT` at the top of `src/App.jsx`:
 
@@ -83,9 +102,23 @@ One flag controls all of it — `SHOW_INVESTMENT` at the top of `src/App.jsx`:
 const SHOW_INVESTMENT = true   // false → every price disappears, page still works
 ```
 
-Set it to `false` to ship a brochure with no numbers, or edit the `from` values on the
-`FORMATS` array once Finance confirms the cost of an event and the minimum profit
+Set it to `false` to ship a brochure with no numbers, or edit `baseCost` / `perGuest` on
+the `FORMATS` array once Finance confirms the cost of an event and the minimum profit
 (both due 31 August).
+
+## The fifth slot is off-calendar, and priced up
+
+Slide 4 leaves one 2027 slot open. Rather than list it as a vague "your summit", the page
+sells it as **Off-Calendar**: the host already has a date, a city or an occasion, and we
+wrap the whole operation around it.
+
+It carries a 30% premium, stated openly on the calendar row, in the brief builder, in the
+FAQ and in both printouts. The reason given to the client is the real one: during a summit
+week crew, freight and venue costs are shared across several events and the guests are
+already in town; off-calendar, none of that is shared and the room has to be brought to
+the city rather than found in it.
+
+Change the rate in one place — `premium: 0.3` on the `offcal` entry in `SUMMITS`.
 
 ## Still to add
 
@@ -96,8 +129,9 @@ Set it to `false` to ship a brochure with no numbers, or edit the `from` values 
   Marketing owes one story and one photo set per format.
 - **Calendar confirmation.** Dates are as recorded in our files. Confirm with each
   organiser before this goes out; SiGMA World Rome is unconfirmed.
-- **The fifth slot.** Listed as an open brief. G2E was proposed on the call — swap it
-  into the `SUMMITS` array once leadership confirms.
+- **The fifth slot.** Sold as an off-calendar premium build rather than a named summit.
+  G2E was proposed on the call — add it to the `SUMMITS` array if leadership would rather
+  have a dated fifth slot than an open one.
 
 ## Development
 
