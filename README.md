@@ -6,6 +6,13 @@ host per event.
 
 **Live:** https://stuatnext.github.io/next-external-projects-2027/
 
+> **One-time setup still needed.** `npm run deploy` has pushed the built site to the
+> `gh-pages` branch, but GitHub Pages has never been switched on for this repo, so the
+> URL above returns "Site not found". Turn it on once — *Settings → Pages → Source:
+> Deploy from a branch → `gh-pages` / `(root)`* — and it publishes immediately; every
+> `npm run deploy` after that just updates it. (The sibling summit repos are already
+> configured this way; the API path that would do it is blocked from this environment.)
+
 This is the sales asset Stuart asked for on the 20 August strategy call — "a deck we can
 start pitching to certain companies that we're doing these external events and how they
 can get involved" — built as a page rather than a deck so a seller can send one link,
