@@ -1224,7 +1224,7 @@ export default function App() {
                 ['13', 'Events delivered since 2024'],
                 ['5', 'Host cities across Europe and the US'],
                 ['300', 'Guests at the largest format'],
-                ['75%', 'Of the room at C-level or head-of'],
+                ['75%', 'Target C-level and head-of'],
               ].map(([n, l], i) => (
                 <div key={l} data-anim style={{ ...anim, transitionDelay: `${i * 80}ms` }} className="glass lift text-center px-4 py-9 rounded-3xl hover:border-brand-yellow/45">
                   <p className="text-5xl md:text-6xl font-bold gold-text mb-3 leading-none tracking-tight">{n}</p>
@@ -1247,7 +1247,7 @@ export default function App() {
             <div data-anim style={anim} className="max-w-3xl mb-14">
               <Eyebrow>The 2027 calendar</Eyebrow>
               <h2 className="text-4xl md:text-6xl font-bold uppercase tracking-tight leading-[1.02] mb-5">
-                Five slots.<br /><span className="gold-text">Four of them dated.</span>
+                Five slots.<br /><span className="gold-text">Three of them dated.</span>
               </h2>
               <p className="text-brand-gray text-lg leading-relaxed">
                 Planned against the summits rather than invented on request. Pick the week your buyers are already
