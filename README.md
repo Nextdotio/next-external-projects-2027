@@ -83,13 +83,15 @@ approved figure must never render as a ±8% range, so `fmtBand` short-circuits w
 format carries a `fee`.
 
 **Guard the margin.** €35,000 was the entry price at **60 guests** in the old model
-(€35k @ 60 rising to €46k @ 120, about €180 a guest in food, drink, kit and transfers).
-Quoting €35,000 flat for any room size would give away roughly €10,800 on a
-120-guest reception. So the fee is published as covering **up to 60 guests**, with
-larger rooms quoted on the brief - the card, the brief builder and both PDF exports all
-say so, and the brief builder adds an explicit "guests beyond the fee" line. If Desi
-intends €35,000 to cover 120 guests too, that is a margin decision to take knowingly,
-not a wording tweak.
+(about €180 a guest in food, drink, kit and transfers on top of a fixed base). The
+room now runs **60 to 350 guests** (Stuart, 17 Sep 2026), so the exposure is no
+longer a rounding error: quoting €35,000 flat at 350 would give away roughly
+**€52,000** of catering on a single event. The fee is therefore published as covering
+**up to 60 guests**, with everything above that quoted on the brief - the card, the
+brief builder and both PDF exports all say so, and the brief builder now shows a live
+"guests beyond the fee" count on the page as well as in the printout and the mailto.
+If Desi and Gerda intend €35,000 to cover a larger room, that is a margin decision to
+take knowingly and in writing, not a wording tweak.
 
 The **off-calendar** slot still adds a **30% premium** on top (`premium` on that
 `SUMMITS` entry).

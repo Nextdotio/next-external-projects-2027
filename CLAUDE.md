@@ -47,10 +47,14 @@ Confirm it prints `Published` before reporting done.
   `fmtBand` short-circuits for any format carrying a `fee`, because an approved figure
   must not render as a ±8% range. The old `baseCost`/`perGuest` model still works for any
   future format that is genuinely guest-scaled.
-- **€35,000 covers up to 60 guests.** That was the 60-guest entry price in the old model
-  (~€180 a guest beyond it). Publishing it flat for any room size gives away ~€10,800 on
-  a 120-guest reception, so the card, brief builder and both PDFs all state the 60-guest
-  scope and quote larger rooms on the brief. Never drop that scope line.
+- **€35,000 covers up to 60 guests; the room runs 60 to 350.** (Stuart, 17 Sep 2026 -
+  `min: 60, max: 350` on the format.) €35,000 was the 60-guest entry price in the old
+  model, ~€180 a guest beyond it, so publishing it flat across a 350-guest room gives
+  away ~€52,000 of catering. The card, the brief builder and both PDFs state the
+  60-guest fee scope *and* the 350 ceiling together - one without the other either
+  caps the sale or gives the build away. Never drop either line. The brief builder
+  shows a live "guests beyond the fee" count on the page, in the printout and in the
+  mailto.
 - **Prices are behind a flag.** `SHOW_INVESTMENT` at the top of `src/App.jsx` toggles
   every indicative figure on the cards, in the brief builder and in both printouts. The
   model is derived from delivered-event history, not an approved price list — see
@@ -61,7 +65,7 @@ Confirm it prints `Published` before reporting done.
 - **Two printables**, both generated client-side into a print window:
   `downloadBrochurePDF()` (hero + footer) and `downloadBriefPDF(brief)` (brief builder).
 - Claims are pitched at the conservative end on purpose: 13 partner-hosted events
-  since 2024, 5 cities. The 900+ figure is different in kind - it is the founders'
+  since 2024, 5 cities. The 500+ figure is different in kind - it is the founders'
   lifetime output since Events by Martin, across two decades and the whole business,
   not partner-hosted events. Keep the two clearly separated wherever they appear. The
   reasoning is in README.md — do not round them up.

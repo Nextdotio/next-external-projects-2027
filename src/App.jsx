@@ -20,7 +20,7 @@ const SHOW_INVESTMENT = true
 
 // ─── Indicative pricing model ─────────────────────────────────────────────
 // Each format is a fixed base (venue, production, staffing, branding, guest
-// list) plus a per-guest rate (food, drink, kit, transfers). A room of 120 does
+// list) plus a per-guest rate (food, drink, kit, transfers). A room of 350 does
 // not cost what a room of 60 costs, and a single "from" figure invites exactly
 // that misreading — so every number on the page is tied to a guest count.
 // Bases are set so that base + perGuest x min reproduces the entry price for
@@ -115,8 +115,8 @@ const FORMATS = [
     icon: Wine,
     img: 'networking-drinks.jpg',
     tagline: 'The widest room, the shortest build.',
-    guests: 'Up to 60 guests included',
-    min: 60, max: 120, def: 60,
+    guests: 'Rooms of 60 to 350 guests',
+    min: 60, max: 350, def: 60,
     duration: 'One evening · 3–4 hours',
     notice: '8 weeks minimum',
     // APPROVED: Drinks Reception at a firm EUR 35,000 covering the format for up
@@ -419,7 +419,7 @@ function downloadBrochurePDF() {
       : f.fee != null ? eur(lo)
       : `${eur(lo)} – ${eur(hi)}`
     const scale = SHOW_INVESTMENT && lo != null
-      ? `<div class="scale">${esc(f.fee != null ? `A fixed fee covering up to ${f.feeCovers} guests · larger rooms quoted on the brief` : `${f.min} guests to ${f.max} guests · about €${f.perGuest} a guest either way`)}</div>` : ''
+      ? `<div class="scale">${esc(f.fee != null ? `A fixed fee covering up to ${f.feeCovers} guests · rooms to ${f.max} quoted on the brief` : `${f.min} guests to ${f.max} guests · about €${f.perGuest} a guest either way`)}</div>` : ''
     return `<div class="fmt">
       <div class="fhead">
         <div><h3>${esc(f.name)}</h3><div class="mut">${esc(f.tagline)}</div></div>
@@ -480,7 +480,7 @@ function downloadBrochurePDF() {
   <section><h2>The 2027 calendar</h2><table>${cal}</table>
   <p class="mut">Summit dates are as published by the organisers and are confirmed with them before anything is booked. Off-calendar builds carry a premium of around ${Math.round((SUMMITS.find((s) => s.id === 'offcal').premium) * 100)}%, because outside a summit week nothing — crew, freight, venue or guest travel — is shared with another event.</p></section>
   <section><h2>The format</h2>${formats}
-  <p class="mut">${SHOW_INVESTMENT ? 'The fee is fixed for the format as specified and covers up to 60 guests: venue, production, staffing, branding and the guest list. Larger rooms and additional catering are quoted against your brief.' : ''}</p></section>
+  <p class="mut">${SHOW_INVESTMENT ? `The fee is fixed for the format as specified and covers up to ${FORMATS[0].feeCovers} guests: venue, production, staffing, branding and the guest list. We build rooms up to ${MAX_GUESTS}; additional guests and catering are quoted against your brief.` : ''}</p></section>
   <section><h2>How the room gets built</h2>
   <p style="margin-bottom:10px">Up to ${MAX_GUESTS} guests per event. We target three quarters of the room at C-level or head-of, and at least eighty per cent matching the criteria you set in writing. Your own list is merged in and de-duplicated. No blanket mailshots.</p>
   <p class="ch">Your post-event report covers</p><ul>${REPORT_IN.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>
@@ -491,7 +491,7 @@ function downloadBrochurePDF() {
   <div class="foot">
     <strong>Start a brief:</strong> sales@next.io &nbsp;&middot;&nbsp; next.io<br>
     First response in one working day &middot; a budget figure in two &middot; a straight answer on deliverability in three &middot; full proposal in five.<br>
-    ${SHOW_INVESTMENT ? 'The Drinks Reception fee is fixed for the format as specified and covers up to 60 guests. It excludes VAT. Larger rooms, additional catering and anything outside the specification are quoted against your brief.<br>' : ''}
+    ${SHOW_INVESTMENT ? `The Drinks Reception fee is fixed for the format as specified and covers up to ${FORMATS[0].feeCovers} guests. It excludes VAT. Larger rooms — we build up to ${MAX_GUESTS} — additional catering and anything outside the specification are quoted against your brief.<br>` : ''}
     Generated ${date}
   </div>
   </body></html>`
@@ -620,7 +620,7 @@ function FormatFeature({ f, onSelect, selected }) {
                   <p className="text-4xl font-bold gold-text leading-none">{fmtPrice(roundTo(entry, 1000))}</p>
                   <p className="text-[11px] text-brand-gray mt-2.5 leading-relaxed max-w-md">
                     {f.fee != null
-                      ? <>A fixed fee for the format as specified, covering up to <span className="text-brand-white font-semibold">{f.feeCovers} guests</span>. Larger rooms are quoted on the brief.</>
+                      ? <>A fixed fee for the format as specified, covering up to <span className="text-brand-white font-semibold">{f.feeCovers} guests</span>. We build rooms up to {f.max} — anything above {f.feeCovers} is quoted on the brief.</>
                       : <>at {f.min} guests, then about <span className="text-brand-white font-semibold">{fmtPrice(f.perGuest)} a guest</span> on top — roughly {fmtPrice(roundTo(indicative(f, f.max), 1000))} at {f.max}.</>}
                   </p>
                 </>
@@ -700,7 +700,7 @@ function FormatCard({ f, onSelect, selected, delay }) {
                 <p className="text-3xl font-bold gold-text leading-none">{fmtPrice(roundTo(entry, 1000))}</p>
                 <p className="text-[11px] text-brand-gray mt-2.5 leading-relaxed">
                   {f.fee != null
-                    ? <>A fixed fee for the format as specified, covering up to <span className="text-brand-white font-semibold">{f.feeCovers} guests</span>. Larger rooms are quoted on the brief.</>
+                    ? <>A fixed fee for the format as specified, covering up to <span className="text-brand-white font-semibold">{f.feeCovers} guests</span>. We build rooms up to {f.max} — anything above {f.feeCovers} is quoted on the brief.</>
                     : <>at {f.min} guests, then about <span className="text-brand-white font-semibold">{fmtPrice(f.perGuest)} a guest</span> on top — roughly {fmtPrice(roundTo(indicative(f, f.max), 1000))} at {f.max}.</>}
                 </p>
               </>
@@ -1044,6 +1044,12 @@ function BriefBuilder({ brief, setBrief }) {
               <p className="text-2xl font-bold gold-text leading-tight">
                 {!fmt ? '—' : est == null ? 'Quoted on brief' : fmtBand(est, fmt)}
               </p>
+              {fmt && overCount(fmt, brief.guests) > 0 && (
+                <p className="text-[11px] text-brand-champagne mt-3 leading-relaxed">
+                  Plus {overCount(fmt, brief.guests)} guests beyond the {fmt.feeCovers} the fee covers — catering for those is
+                  quoted against your brief, never added afterwards.
+                </p>
+              )}
               {premium > 0 && est != null && (
                 <p className="text-[11px] text-brand-champagne mt-3 leading-relaxed">
                   Includes the +{Math.round(premium * 100)}% off-calendar premium — outside a summit week, nothing is shared.
@@ -1213,7 +1219,7 @@ export default function App() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
               {[
-                ['900+', 'Events delivered worldwide since Events by Martin'],
+                ['500+', 'Events delivered worldwide since Events by Martin'],
                 ['13', 'Partner-hosted events delivered since 2024'],
                 ['5', 'Host cities across Europe and the US'],
                 ['75%', 'Target C-level and head-of'],
@@ -1225,7 +1231,7 @@ export default function App() {
               ))}
             </div>
             <p data-anim style={anim} className="text-brand-gray text-sm mt-7 max-w-3xl leading-relaxed">
-              The founders of Events by Martin have produced more than 900 events around the world across two decades,
+              The founders of Events by Martin have produced more than 500 events around the world across two decades,
               a track record that became NEXT.io and now NEXTPredict. The thirteen above are the partner-hosted events
               we have delivered since 2024: Rome, Barcelona, Malta, London and SBC Summit Americas in Florida. Our
               longest-standing host has run seven of them with us across four cities — which is the number we would
@@ -1345,7 +1351,7 @@ export default function App() {
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 mb-16">
               {[
-                ['120', 'Guests at the largest room we build'],
+                [String(MAX_GUESTS), 'Guests at the largest room we build'],
                 ['75%', 'Target C-level and head-of'],
                 ['80%', 'Of your written guest criteria'],
                 ['1', 'Host per event — always'],
