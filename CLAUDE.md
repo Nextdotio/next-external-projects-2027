@@ -31,6 +31,15 @@ Confirm it prints `Published` before reporting done.
   per-event costs or margins, client concentration, commission, pipeline maths, the
   readiness gate or open leadership decisions. Past clients are described, not named —
   naming one needs their written permission first.
+- **Keep our own governance off the page.** The site never says a format, a fee or
+  a figure was *approved*, *signed off* or *derived* — that is how we talk internally
+  about our own process, and a host reads it as us negotiating with ourselves. The
+  page states what the client gets and what it costs. Same for measurement jargon
+  (no "KPI") and for hedges that explain where a number came from. The rationale
+  belongs in code comments, CLAUDE.md and README.md, which is where it lives.
+- **`MAX_GUESTS`** is derived from `FORMATS`, so the hero chip and the printed
+  brochure cannot drift from the largest room a published format actually builds.
+  Never hardcode a guest ceiling.
 - **One approved format only** (Desi + Gerda, 17 Sep 2026): the Drinks Reception at a
   firm €35,000. The other five were removed - they were derived from delivered-event
   history, never an approved rate card. Do not reinstate one without a written approval.

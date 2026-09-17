@@ -106,6 +106,8 @@ const STATUS_STYLE = {
 }
 
 // ─── The approved format ──────────────────────────────────────────────────────
+// The largest room any published format builds. Derived so the hero chip and
+// the printed brochure can never drift from the formats themselves.
 const FORMATS = [
   {
     id: 'reception',
@@ -141,6 +143,8 @@ const FORMATS = [
     ],
   },
 ]
+
+const MAX_GUESTS = Math.max(...FORMATS.map((f) => f.max))
 
 // ─── How the room gets built ──────────────────────────────────────────────
 const ROOM_STEPS = [
@@ -240,7 +244,7 @@ const TIMELINE = [
 
 const RESPONSE = [
   { d: '1', t: 'First response', b: 'A named person replies, with the questions we need answered.' },
-  { d: '2', t: 'Indicative range', b: 'A budget range for any standard format, so you can take a number into a meeting.' },
+  { d: '2', t: 'A budget figure', b: 'A number you can take into a meeting, before anything has been scoped or booked.' },
   { d: '3', t: 'Can we deliver it', b: 'A straight yes or no on the format, the city and the date. We would rather say no early.' },
   { d: '5', t: 'Full proposal', b: 'Venues, scope, costs and timeline — once we have everything we asked for.' },
 ]
@@ -388,9 +392,9 @@ function downloadBriefPDF(brief) {
     </div>
   </div>
   <div class="foot">
-    <strong>Send this back and the clock starts.</strong> First response in one working day, an indicative range in two, a straight answer on deliverability in three, and a full proposal in five once we have everything we have asked for.<br>
+    <strong>Send this back and the clock starts.</strong> First response in one working day, a budget figure in two, a straight answer on deliverability in three, and a full proposal in five once we have everything we have asked for.<br>
     <strong>sales@next.io</strong> &nbsp;&middot;&nbsp; next.io<br>
-    Indicative figures move with guest numbers, are for planning only and exclude VAT. Every event is quoted against its own brief.
+    Fees cover the format as specified and exclude VAT. Anything beyond the scope set out here is quoted on the brief.
   </div>
   </body></html>`
   openPrintable(html)
@@ -409,9 +413,11 @@ function downloadBrochurePDF() {
   const formats = FORMATS.map((f) => {
     const lo = indicative(f, f.min)
     const hi = f.fee != null ? lo : indicative(f, f.max)
+    const eur = (v) => '€' + Math.round(roundTo(v, 1000)).toLocaleString('en-US')
     const price = !SHOW_INVESTMENT ? ''
       : lo == null ? 'POA'
-      : `${'€' + Math.round(roundTo(lo, 1000)).toLocaleString('en-US')} – ${'€' + Math.round(roundTo(hi, 1000)).toLocaleString('en-US')}`
+      : f.fee != null ? eur(lo)
+      : `${eur(lo)} – ${eur(hi)}`
     const scale = SHOW_INVESTMENT && lo != null
       ? `<div class="scale">${esc(f.fee != null ? `A fixed fee covering up to ${f.feeCovers} guests · larger rooms quoted on the brief` : `${f.min} guests to ${f.max} guests · about €${f.perGuest} a guest either way`)}</div>` : ''
     return `<div class="fmt">
@@ -476,15 +482,15 @@ function downloadBrochurePDF() {
   <section><h2>The format</h2>${formats}
   <p class="mut">${SHOW_INVESTMENT ? 'The fee is fixed for the format as specified and covers up to 60 guests: venue, production, staffing, branding and the guest list. Larger rooms and additional catering are quoted against your brief.' : ''}</p></section>
   <section><h2>How the room gets built</h2>
-  <p style="margin-bottom:10px">Up to 300 guests per event. We target three quarters of the room at C-level or head-of, and at least eighty per cent matching the criteria you set in writing. Your own list is merged in and de-duplicated. No blanket mailshots.</p>
+  <p style="margin-bottom:10px">Up to ${MAX_GUESTS} guests per event. We target three quarters of the room at C-level or head-of, and at least eighty per cent matching the criteria you set in writing. Your own list is merged in and de-duplicated. No blanket mailshots.</p>
   <p class="ch">Your post-event report covers</p><ul>${REPORT_IN.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>
-  <p style="margin-top:10px"><strong>What it does not cover:</strong> your pipeline. We can tell you exactly who walked in, how senior they were and who they met. What that becomes commercially is your process, not our KPI.</p></section>
+  <p style="margin-top:10px"><strong>What it does not cover:</strong> your pipeline. We can tell you exactly who walked in, how senior they were and who they met. What that becomes commercially is yours to run.</p></section>
   <section><h2>From brief to event in twelve weeks</h2><table>${steps}</table>
   <p class="mut">Eight weeks is usually enough if you have hosted with us before.</p></section>
   <section><h2>How we work with you</h2><ol>${terms}</ol></section>
   <div class="foot">
     <strong>Start a brief:</strong> sales@next.io &nbsp;&middot;&nbsp; next.io<br>
-    First response in one working day &middot; indicative range in two &middot; a straight answer on deliverability in three &middot; full proposal in five.<br>
+    First response in one working day &middot; a budget figure in two &middot; a straight answer on deliverability in three &middot; full proposal in five.<br>
     ${SHOW_INVESTMENT ? 'The Drinks Reception fee is fixed for the format as specified and covers up to 60 guests. It excludes VAT. Larger rooms, additional catering and anything outside the specification are quoted against your brief.<br>' : ''}
     Generated ${date}
   </div>
@@ -552,11 +558,10 @@ function FormatFeature({ f, onSelect, selected }) {
         <div className="absolute inset-0 bg-gradient-to-br from-brand-yellow/12 via-transparent to-transparent" />
         <div className="hidden lg:block absolute inset-y-0 right-0 w-36 bg-gradient-to-r from-transparent to-brand-dark/95" />
         <div className="absolute inset-x-0 bottom-0 p-8 lg:p-10">
-          <div className="flex items-center gap-2.5 mb-3">
-            <Icon className="w-5 h-5 text-brand-yellow" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-yellow/90">The approved format</span>
+          <div className="flex items-center gap-3 mb-2">
+            <Icon className="w-7 h-7 text-brand-yellow shrink-0" />
+            <h3 className="text-3xl md:text-4xl font-bold uppercase tracking-tight leading-[1.05]">{f.name}</h3>
           </div>
-          <h3 className="text-3xl md:text-4xl font-bold uppercase tracking-tight leading-[1.05] mb-2">{f.name}</h3>
           <p className="text-brand-champagne/90 italic">{f.tagline}</p>
         </div>
       </div>
@@ -957,7 +962,7 @@ function BriefBuilder({ brief, setBrief }) {
 
         <div data-anim style={anim} className="glass rounded-3xl p-7">
           <p className="text-[10px] uppercase tracking-[0.3em] text-brand-gray mb-5">2 · The format</p>
-          <div className="grid sm:grid-cols-3 gap-2.5">
+          <div className={`grid gap-2.5 ${FORMATS.length === 1 ? '' : 'sm:grid-cols-3'}`}>
             {FORMATS.map((f) => {
               const Icon = f.icon
               const on = brief.format === f.id
@@ -1022,7 +1027,7 @@ function BriefBuilder({ brief, setBrief }) {
               ['Where / when', smt ? `${smt.city} · ${smt.dates}` : '—'],
               ['Format', fmt ? fmt.name : 'Not chosen yet'],
               ['Guests', fmt ? `approx. ${brief.guests}` : '—'],
-              ['Lead time', fmt ? fmt.notice : '8–16 weeks by format'],
+              ['Lead time', fmt ? fmt.notice : FORMATS[0].notice],
             ].map(([k, v]) => (
               <div key={k} className="flex justify-between gap-4 border-b border-brand-white/10 pb-3">
                 <dt className="text-[10px] uppercase tracking-[0.2em] text-brand-gray shrink-0 pt-0.5">{k}</dt>
@@ -1034,7 +1039,7 @@ function BriefBuilder({ brief, setBrief }) {
           {SHOW_INVESTMENT && (
             <div className="rounded-2xl bg-brand-dark/70 border border-brand-white/10 p-5 mb-6">
               <p className="text-[10px] uppercase tracking-[0.25em] text-brand-gray mb-2">
-                {fmt ? (fmt.fee != null ? `Fee, covering ${fmt.feeCovers} guests` : `Indicative at ${brief.guests} guests`) : 'Indicative investment'}
+                {fmt ? (fmt.fee != null ? `Fee, covering ${fmt.feeCovers} guests` : `Indicative at ${brief.guests} guests`) : 'Investment'}
               </p>
               <p className="text-2xl font-bold gold-text leading-tight">
                 {!fmt ? '—' : est == null ? 'Quoted on brief' : fmtBand(est, fmt)}
@@ -1045,8 +1050,9 @@ function BriefBuilder({ brief, setBrief }) {
                 </p>
               )}
               <p className="text-[11px] text-brand-gray mt-3 leading-relaxed">
-                Moves with guest numbers. For planning only, excluding VAT — your number comes from your brief, not
-                from this page.
+                {fmt && fmt.fee != null
+                  ? <>Excludes VAT. A larger room, or anything outside the specification, is quoted against your brief.</>
+                  : <>Moves with guest numbers, excludes VAT, and is quoted against your brief before anything is booked.</>}
               </p>
             </div>
           )}
@@ -1086,7 +1092,10 @@ export default function App() {
     document.getElementById('brief')?.scrollIntoView({ behavior: 'smooth' })
   }, [])
 
-  const navLinks = useMemo(() => ['What It Is', 'Calendar', 'Formats', 'The Room', 'How It Works', 'Brief'], [])
+  const navLinks = useMemo(() => [
+    ['What It Is', 'what-it-is'], ['Calendar', 'calendar'], ['The Format', 'formats'],
+    ['The Room', 'the-room'], ['How It Works', 'how-it-works'], ['Brief', 'brief'],
+  ], [])
 
   return (
     <div className="grain min-h-screen bg-brand-dark text-brand-white font-sans">
@@ -1101,7 +1110,7 @@ export default function App() {
             </span>
           </a>
           <div className="flex items-center gap-7">
-            <a href="#formats" className="text-[11px] font-bold uppercase tracking-[0.2em] hover:text-brand-yellow transition-colors hidden md:block">Formats</a>
+            <a href="#formats" className="text-[11px] font-bold uppercase tracking-[0.2em] hover:text-brand-yellow transition-colors hidden md:block">The Format</a>
             <a href="#brief" className="text-[11px] font-bold uppercase tracking-[0.2em] hover:text-brand-yellow transition-colors hidden md:block">Build a Brief</a>
             <a
               href="mailto:sales@next.io?subject=NEXT.io External Projects 2027 - Event Enquiry"
@@ -1141,7 +1150,7 @@ export default function App() {
               {[
                 [CalendarDays, 'Five slots in 2027'],
                 [Crown, 'One host per event'],
-                [Users, 'Up to 300 curated guests'],
+                [Users, `Up to ${MAX_GUESTS} curated guests`],
                 [BadgeCheck, '75% C-level target'],
               ].map(([Icon, label]) => (
                 <span key={label} className="flex items-center gap-2 glass rounded-full py-2.5 px-5">
@@ -1158,13 +1167,13 @@ export default function App() {
               </button>
             </div>
             <div className="flex flex-wrap justify-center gap-2.5">
-              {navLinks.map((s) => (
+              {navLinks.map(([label, id]) => (
                 <a
-                  key={s}
-                  href={`#${s.toLowerCase().replace(/\s+/g, '-')}`}
+                  key={id}
+                  href={`#${id}`}
                   className="text-brand-gray hover:text-brand-yellow font-bold uppercase tracking-[0.2em] text-[10px] transition-colors border border-brand-white/12 hover:border-brand-yellow/60 px-5 py-2.5 rounded-full"
                 >
-                  {s}
+                  {label}
                 </a>
               ))}
             </div>
@@ -1297,12 +1306,12 @@ export default function App() {
           <div className="spill w-[34rem] h-[34rem] -left-48 top-1/4 opacity-45" />
           <div className="relative max-w-7xl mx-auto px-6 sm:px-8">
             <div data-anim style={anim} className="max-w-3xl mb-14">
-              <Eyebrow>The format</Eyebrow>
+              <Eyebrow>What we build</Eyebrow>
               <h2 className="text-4xl md:text-6xl font-bold uppercase tracking-tight leading-[1.02] mb-5">
-                One format,<br /><span className="gold-text">not a blank page.</span>
+                A proven format,<br /><span className="gold-text">not a blank page.</span>
               </h2>
               <p className="text-brand-gray text-lg leading-relaxed">
-                We have built and run this one many times over, which is why we can tell you exactly what it includes,
+                We have built and run this many times over, which is why we can tell you exactly what it includes,
                 what it does not, and how much notice it needs before you have signed anything.
                 {SHOW_INVESTMENT && ' The fee is fixed for the format as specified — no surprises once the brief is agreed.'}
               </p>
@@ -1386,8 +1395,8 @@ export default function App() {
                 <p className="text-3xl font-bold gold-text leading-tight mb-4">Your pipeline.</p>
                 <p className="text-brand-gray leading-relaxed">
                   We can tell you exactly who walked in, how senior they were, who they met and what they thought of
-                  the evening. What that becomes commercially is your process, not our KPI — and we would rather say
-                  that now than dress an attendance number up as revenue in three months’ time.
+                  the evening. What that becomes commercially is yours to run — and we would rather say that now
+                  than dress an attendance number up as revenue in three months’ time.
                 </p>
               </div>
             </div>
@@ -1549,7 +1558,7 @@ export default function App() {
           </div>
         </div>
         <p className="max-w-7xl mx-auto px-6 sm:px-8 text-brand-gray/70 text-xs mt-9 leading-relaxed">
-          {SHOW_INVESTMENT && 'Indicative investment levels move with guest numbers, are for planning only, exclude VAT, and are based on events NEXT.io has delivered. Every event is quoted against its own brief. '}
+          {SHOW_INVESTMENT && 'Fees cover the format as specified and exclude VAT. Guest numbers, cities and dates beyond the scope set out here are quoted on the brief. '}
           Summit dates are as published by the organisers and are confirmed before anything is booked. Availability subject to change.
         </p>
       </footer>
