@@ -28,12 +28,17 @@ const SHOW_INVESTMENT = true
 const fmtPrice = (n) => '€' + Math.round(n).toLocaleString('en-US')
 const roundTo = (n, step) => Math.round(n / step) * step
 
+// The Drinks Reception fee is signed off, so it is quoted as a fee. Guests beyond
+// what the fee covers are catered on quote, never silently absorbed.
 const indicative = (f, guests, premium = 0) =>
-  f.baseCost == null ? null : (f.baseCost + f.perGuest * guests) * (1 + premium)
+  f.fee != null ? f.fee * (1 + premium)
+    : f.baseCost == null ? null : (f.baseCost + f.perGuest * guests) * (1 + premium)
+const overCount = (f, guests) => (f.fee != null && guests > f.feeCovers ? guests - f.feeCovers : 0)
 
 // Quotes show a range, not a point estimate — the underlying data is thin.
 const bandFor = (n) => [roundTo(n * 0.92, 1000), roundTo(n * 1.08, 1000)]
-const fmtBand = (n) => {
+const fmtBand = (n, f) => {
+  if (f && f.fee != null) return fmtPrice(roundTo(n, 1000))
   const [lo, hi] = bandFor(n)
   return `${fmtPrice(lo)} – ${fmtPrice(hi)}`
 }
@@ -100,7 +105,7 @@ const STATUS_STYLE = {
   premium: { label: 'Premium build', cls: 'bg-transparent text-brand-champagne border border-brand-yellow/60' },
 }
 
-// ─── The six formats ──────────────────────────────────────────────────────
+// ─── The approved format ──────────────────────────────────────────────────────
 const FORMATS = [
   {
     id: 'reception',
@@ -108,11 +113,15 @@ const FORMATS = [
     icon: Wine,
     img: 'networking-drinks.jpg',
     tagline: 'The widest room, the shortest build.',
-    guests: '60–120 guests',
-    min: 60, max: 120, def: 90,
+    guests: 'Up to 60 guests included',
+    min: 60, max: 120, def: 60,
     duration: 'One evening · 3–4 hours',
     notice: '8 weeks minimum',
-    baseCost: 24200, perGuest: 180,
+    // APPROVED: Drinks Reception at a firm EUR 35,000 covering the format for up
+    // to 60 guests. Beyond 60, catering is quoted on the brief. No derived band -
+    // this figure is signed off, not inferred.
+    fee: 35000, feeCovers: 60,
+    baseCost: null, perGuest: null,
     bestFor: 'First-time hosts, market entries and launches that need volume and visibility rather than a seating plan.',
     included: [
       'Private venue within walking distance of the summit, held exclusively for you',
@@ -129,146 +138,6 @@ const FORMATS = [
       'Seated dining or a formal programme',
       'Stage production, talent or entertainment booking',
       'Guest travel, transfers or accommodation',
-    ],
-  },
-  {
-    id: 'dinner',
-    name: 'Private Dinner',
-    icon: UtensilsCrossed,
-    img: 'gala-dinner.jpg',
-    tagline: 'One table. The right forty people.',
-    guests: '20–40 guests',
-    min: 20, max: 40, def: 30,
-    duration: 'One evening · 3–4 hours',
-    notice: '8 weeks minimum',
-    baseCost: 36000, perGuest: 450,
-    bestFor: 'Senior relationship work, where the value is in the conversation rather than the headcount.',
-    included: [
-      'Private dining room chosen for the room itself, not for the address',
-      'Set menu and wine pairing agreed with you in advance',
-      'Seating plan built around who you want talking to whom',
-      'Branded menus, place cards and room dressing',
-      'Curated guest list, personally invited and personally chased',
-      'Host briefing pack — who is coming, why they matter, what to ask them',
-      'A NEXT.io host on the night to make the introductions',
-      'Photography and a post-event attendance report',
-    ],
-    excluded: [
-      'Standing reception overflow beyond the table plan',
-      'Large-scale AV or stage production',
-      'Guest travel, transfers or accommodation',
-    ],
-  },
-  {
-    id: 'lounge',
-    name: 'Private Lounge',
-    icon: Coffee,
-    img: 'tech-hub.jpg',
-    tagline: 'Somewhere better than a hotel lobby.',
-    guests: '80–200 guests across the week',
-    min: 80, max: 200, def: 140,
-    duration: 'One to three days',
-    notice: '10 weeks minimum',
-    baseCost: 39000, perGuest: 200,
-    bestFor: 'Teams running back-to-back meetings all week who need a base with their name on it.',
-    included: [
-      'A dedicated space held for the full duration, close to the summit floor',
-      'Branded fit-out — furniture, signage, screens and printed collateral',
-      'Barista service through the day, bar service from late afternoon',
-      'Meeting pods or private corners for scheduled conversations',
-      'Scheduled guest flow, so the room is never empty and never overrun',
-      'Meeting-booking support against your target account list',
-      'Concierge and reception staffing throughout',
-      'Daily footfall and attendance reporting while the lounge is live',
-    ],
-    excluded: [
-      'Exhibition space or stand rights on the summit floor itself',
-      'An evening entertainment programme',
-      'Guest travel, transfers or accommodation',
-    ],
-  },
-  {
-    id: 'hospitality',
-    name: 'Hospitality Day',
-    icon: Trophy,
-    img: 'golf-tournament.jpg',
-    tagline: 'Six hours beats six minutes on a stand.',
-    guests: '30–80 guests',
-    min: 30, max: 80, def: 50,
-    duration: 'Full day · off site',
-    notice: '12 weeks minimum',
-    baseCost: 50500, perGuest: 650,
-    bestFor: 'Long-form relationship time away from the show floor — golf, padel, sailing, track or wellness.',
-    included: [
-      'Activity and venue chosen with you and booked exclusively',
-      'Return transfers from the summit or the partner hotels',
-      'Full-day food and beverage, including a closing dinner or reception',
-      'Branded kit, prizes and on-site signage',
-      'Guest list matched to the activity as well as to the seniority brief',
-      'Host briefing pack with pairings or team sheets',
-      'Photography and video across the day',
-      'A NEXT.io event manager and crew on site throughout',
-    ],
-    excluded: [
-      'Flights and accommodation',
-      'Equipment hire beyond the standard package',
-      'An evening programme beyond the closing dinner',
-    ],
-  },
-  {
-    id: 'vip',
-    name: 'VIP Side Event',
-    icon: PartyPopper,
-    img: 'nextworking-day1.jpg',
-    tagline: 'The night they talk about the next morning.',
-    guests: '150–300 guests',
-    min: 150, max: 300, def: 220,
-    duration: 'One evening · full production',
-    notice: '12 weeks minimum',
-    baseCost: 50500, perGuest: 230,
-    bestFor: 'The headline moment of a summit week, running under your name and nobody else’s.',
-    included: [
-      'A signature venue — rooftop, waterfront, gallery or club — held exclusively',
-      'Full production: stage, AV, lighting, sound and scenography',
-      'Talent and entertainment booking and management',
-      'Full-service food and beverage across the evening',
-      'A branded environment end to end, starting at guest arrival',
-      'Curated guest list up to 300, invited and chased individually',
-      'Hosted event page, RSVP system and the full WhatsApp invite journey',
-      'Door, guest list and VIP arrival management',
-      'A dedicated NEXT.io event manager and on-site crew',
-      'Photography, video and a full post-event report',
-    ],
-    excluded: [
-      'Summit sponsorship rights or delegate passes',
-      'Guest travel, transfers or accommodation',
-      'Media buying or paid promotion beyond the guest journey',
-    ],
-  },
-  {
-    id: 'flagship',
-    name: 'Flagship Build',
-    icon: Crown,
-    img: 'leadership-stage-crowd.jpg',
-    tagline: 'When the format does not exist yet.',
-    guests: 'Brief-led',
-    min: 100, max: 300, def: 200,
-    duration: 'One to several days',
-    notice: '16 weeks minimum',
-    baseCost: null, perGuest: null,
-    bestFor: 'Anniversaries, launches and city takeovers where the answer is not on this page.',
-    included: [
-      'Concept development from your objectives, not from a template',
-      'Venue search and a shortlist across the host city',
-      'Custom build and scenography designed for the brief',
-      'Multi-day programming across formats where the brief calls for it',
-      'A dedicated NEXT.io project team from first brief to final review',
-      'Measurement designed around what you told us success looks like',
-      'Everything in the standard formats, wherever the brief needs it',
-    ],
-    excluded: [
-      'Standard turnaround times — bespoke work is scoped before it is quoted',
-      'Anything agreed after signature without a priced change note',
     ],
   },
 ]
@@ -408,7 +277,7 @@ const FAQS = [
   },
   {
     q: 'How quickly can you turn one around?',
-    a: 'Standard formats need eight to twelve weeks depending on the build. If you have hosted with us before, eight weeks is usually enough because we already know how you work.',
+    a: 'The reception needs eight to twelve weeks depending on the build. If you have hosted with us before, eight weeks is usually enough because we already know how you work.',
   },
 ]
 
@@ -432,7 +301,7 @@ function buildMailto(brief) {
     `  Guests:        ${fmt ? `approx. ${brief.guests}` : 'To be discussed'}`,
     fmt ? `  Lead time:     ${fmt.notice}` : null,
     SHOW_INVESTMENT && fmt
-      ? `  Indicative:    ${est ? `${fmtBand(est)} at ${brief.guests} guests` : 'quoted on brief'}${premium ? ' (includes off-calendar premium)' : ''}`
+      ? `  ${fmt && fmt.fee != null ? 'Fee:          ' : 'Indicative:   '} ${est ? (fmt && fmt.fee != null ? `${fmtBand(est, fmt)} covering ${fmt.feeCovers} guests${overCount(fmt, brief.guests) ? `, plus ${overCount(fmt, brief.guests)} on quote` : ''}` : `${fmtBand(est)} at ${brief.guests} guests`) : 'quoted on brief'}${premium ? ' (includes off-calendar premium)' : ''}`
       : null,
     '',
     'Our objectives for the event:',
@@ -496,7 +365,8 @@ function downloadBriefPDF(brief) {
       ${row('Format', fmt ? fmt.name : 'To be discussed')}
       ${row('Guest numbers', fmt ? `approx. ${brief.guests}` : 'To be discussed')}
       ${row('Minimum lead time', fmt ? fmt.notice : '8–16 weeks depending on format')}
-      ${SHOW_INVESTMENT ? row(`Indicative at ${fmt ? brief.guests : '—'} guests`, est ? fmtBand(est) : 'Quoted on brief') : ''}
+      ${SHOW_INVESTMENT ? row(fmt && fmt.fee != null ? `Fee, covering ${fmt.feeCovers} guests` : `Indicative at ${fmt ? brief.guests : '—'} guests`, est ? fmtBand(est, fmt) : 'Quoted on brief') : ''}
+      ${SHOW_INVESTMENT && fmt && overCount(fmt, brief.guests) ? row('Guests beyond the fee', `${overCount(fmt, brief.guests)} - catering quoted on the brief`) : ''}
       ${SHOW_INVESTMENT && premium ? row('Off-calendar premium', `Included — +${Math.round(premium * 100)}% for a build outside a summit week`) : ''}
       ${row('Exclusivity', 'One host per event — no co-sponsors')}
     </table>
@@ -538,12 +408,12 @@ function downloadBrochurePDF() {
     </tr>`).join('')
   const formats = FORMATS.map((f) => {
     const lo = indicative(f, f.min)
-    const hi = indicative(f, f.max)
+    const hi = f.fee != null ? lo : indicative(f, f.max)
     const price = !SHOW_INVESTMENT ? ''
       : lo == null ? 'POA'
       : `${'€' + Math.round(roundTo(lo, 1000)).toLocaleString('en-US')} – ${'€' + Math.round(roundTo(hi, 1000)).toLocaleString('en-US')}`
     const scale = SHOW_INVESTMENT && lo != null
-      ? `<div class="scale">${esc(`${f.min} guests to ${f.max} guests · about €${f.perGuest} a guest either way`)}</div>` : ''
+      ? `<div class="scale">${esc(f.fee != null ? `A fixed fee covering up to ${f.feeCovers} guests · larger rooms quoted on the brief` : `${f.min} guests to ${f.max} guests · about €${f.perGuest} a guest either way`)}</div>` : ''
     return `<div class="fmt">
       <div class="fhead">
         <div><h3>${esc(f.name)}</h3><div class="mut">${esc(f.tagline)}</div></div>
@@ -603,8 +473,8 @@ function downloadBrochurePDF() {
   </div>
   <section><h2>The 2027 calendar</h2><table>${cal}</table>
   <p class="mut">Summit dates are as published by the organisers and are confirmed with them before anything is booked. Off-calendar builds carry a premium of around ${Math.round((SUMMITS.find((s) => s.id === 'offcal').premium) * 100)}%, because outside a summit week nothing — crew, freight, venue or guest travel — is shared with another event.</p></section>
-  <section><h2>Six formats</h2>${formats}
-  <p class="mut">${SHOW_INVESTMENT ? 'Ranges span each format at its smallest and its largest. Every figure moves with guest numbers — the per-guest rate covers food, drink, kit and transfers, while the base covers venue, production, staffing and the guest list.' : ''}</p></section>
+  <section><h2>The format</h2>${formats}
+  <p class="mut">${SHOW_INVESTMENT ? 'The fee is fixed for the format as specified and covers up to 60 guests: venue, production, staffing, branding and the guest list. Larger rooms and additional catering are quoted against your brief.' : ''}</p></section>
   <section><h2>How the room gets built</h2>
   <p style="margin-bottom:10px">Up to 300 guests per event. We target three quarters of the room at C-level or head-of, and at least eighty per cent matching the criteria you set in writing. Your own list is merged in and de-duplicated. No blanket mailshots.</p>
   <p class="ch">Your post-event report covers</p><ul>${REPORT_IN.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>
@@ -615,7 +485,7 @@ function downloadBrochurePDF() {
   <div class="foot">
     <strong>Start a brief:</strong> sales@next.io &nbsp;&middot;&nbsp; next.io<br>
     First response in one working day &middot; indicative range in two &middot; a straight answer on deliverability in three &middot; full proposal in five.<br>
-    ${SHOW_INVESTMENT ? 'Indicative investment levels move with guest numbers, are for planning only, exclude VAT, and are based on events we have delivered. Every event is quoted against its own brief.<br>' : ''}
+    ${SHOW_INVESTMENT ? 'The Drinks Reception fee is fixed for the format as specified and covers up to 60 guests. It excludes VAT. Larger rooms, additional catering and anything outside the specification are quoted against your brief.<br>' : ''}
     Generated ${date}
   </div>
   </body></html>`
@@ -702,7 +572,7 @@ function FormatCard({ f, onSelect, selected, delay }) {
 
         {SHOW_INVESTMENT && (
           <div className="mb-6 pb-6 border-b border-brand-white/10">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-brand-gray mb-2">Indicative investment</p>
+            <p className="text-[10px] uppercase tracking-[0.25em] text-brand-gray mb-2">{f.fee != null ? 'Investment' : 'Indicative investment'}</p>
             {entry == null ? (
               <>
                 <p className="text-3xl font-bold gold-text leading-none">Quoted on brief</p>
@@ -710,10 +580,11 @@ function FormatCard({ f, onSelect, selected, delay }) {
               </>
             ) : (
               <>
-                <p className="text-3xl font-bold gold-text leading-none">from {fmtPrice(roundTo(entry, 1000))}</p>
+                <p className="text-3xl font-bold gold-text leading-none">{fmtPrice(roundTo(entry, 1000))}</p>
                 <p className="text-[11px] text-brand-gray mt-2.5 leading-relaxed">
-                  at {f.min} guests, then about <span className="text-brand-white font-semibold">{fmtPrice(f.perGuest)} a guest</span> on top —
-                  roughly {fmtPrice(roundTo(indicative(f, f.max), 1000))} at {f.max}.
+                  {f.fee != null
+                    ? <>A fixed fee for the format as specified, covering up to <span className="text-brand-white font-semibold">{f.feeCovers} guests</span>. Larger rooms are quoted on the brief.</>
+                    : <>at {f.min} guests, then about <span className="text-brand-white font-semibold">{fmtPrice(f.perGuest)} a guest</span> on top — roughly {fmtPrice(roundTo(indicative(f, f.max), 1000))} at {f.max}.</>}
                 </p>
               </>
             )}
@@ -1018,7 +889,7 @@ function BriefBuilder({ brief, setBrief }) {
               {SHOW_INVESTMENT && fmt.baseCost != null && (
                 <p className="text-[11px] text-brand-gray mt-5 leading-relaxed">
                   Moving this moves the number. Food, drink, kit and transfers scale with the room at about{' '}
-                  <span className="text-brand-white font-semibold">{fmtPrice(fmt.perGuest)} a guest</span>; venue,
+                  <span className="text-brand-white font-semibold">{fmt.fee != null ? 'quoted on the brief' : fmtPrice(fmt.perGuest) + ' a guest'}</span>; venue,
                   production, staffing and the guest list do not.
                 </p>
               )}
@@ -1051,10 +922,10 @@ function BriefBuilder({ brief, setBrief }) {
           {SHOW_INVESTMENT && (
             <div className="rounded-2xl bg-brand-dark/70 border border-brand-white/10 p-5 mb-6">
               <p className="text-[10px] uppercase tracking-[0.25em] text-brand-gray mb-2">
-                {fmt ? `Indicative at ${brief.guests} guests` : 'Indicative investment'}
+                {fmt ? (fmt.fee != null ? `Fee, covering ${fmt.feeCovers} guests` : `Indicative at ${brief.guests} guests`) : 'Indicative investment'}
               </p>
               <p className="text-2xl font-bold gold-text leading-tight">
-                {!fmt ? '—' : est == null ? 'Quoted on brief' : fmtBand(est)}
+                {!fmt ? '—' : est == null ? 'Quoted on brief' : fmtBand(est, fmt)}
               </p>
               {premium > 0 && est != null && (
                 <p className="text-[11px] text-brand-champagne mt-3 leading-relaxed">
@@ -1221,9 +1092,9 @@ export default function App() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
               {[
-                ['13', 'Events delivered since 2024'],
+                ['900+', 'Events delivered worldwide since Events by Martin'],
+                ['13', 'Partner-hosted events delivered since 2024'],
                 ['5', 'Host cities across Europe and the US'],
-                ['300', 'Guests at the largest format'],
                 ['75%', 'Target C-level and head-of'],
               ].map(([n, l], i) => (
                 <div key={l} data-anim style={{ ...anim, transitionDelay: `${i * 80}ms` }} className="glass lift text-center px-4 py-9 rounded-3xl hover:border-brand-yellow/45">
@@ -1233,9 +1104,11 @@ export default function App() {
               ))}
             </div>
             <p data-anim style={anim} className="text-brand-gray text-sm mt-7 max-w-3xl leading-relaxed">
-              Rome, Barcelona, Malta, London and SBC Summit Americas in Florida. Our longest-standing host has run
-              seven of these with us across four cities — which is the number we would rather be judged on than any
-              of the others.
+              The founders of Events by Martin have produced more than 900 events around the world across two decades,
+              a track record that became NEXT.io and now NEXTPredict. The thirteen above are the partner-hosted events
+              we have delivered since 2024: Rome, Barcelona, Malta, London and SBC Summit Americas in Florida. Our
+              longest-standing host has run seven of them with us across four cities — which is the number we would
+              rather be judged on than any of the others.
             </p>
           </div>
         </section>
@@ -1312,17 +1185,17 @@ export default function App() {
           <div className="spill w-[34rem] h-[34rem] -left-48 top-1/4 opacity-45" />
           <div className="relative max-w-7xl mx-auto px-6 sm:px-8">
             <div data-anim style={anim} className="max-w-3xl mb-14">
-              <Eyebrow>The formats</Eyebrow>
+              <Eyebrow>The format</Eyebrow>
               <h2 className="text-4xl md:text-6xl font-bold uppercase tracking-tight leading-[1.02] mb-5">
-                Six formats,<br /><span className="gold-text">not a blank page.</span>
+                One format,<br /><span className="gold-text">not a blank page.</span>
               </h2>
               <p className="text-brand-gray text-lg leading-relaxed">
-                Every one of these has been built and run before, which is why we can tell you what it includes, what
-                it does not, and how much notice it needs before you have signed anything.
-                {SHOW_INVESTMENT && ' Every figure moves with the size of the room — nothing here is a flat fee.'}
+                We have built and run this one many times over, which is why we can tell you exactly what it includes,
+                what it does not, and how much notice it needs before you have signed anything.
+                {SHOW_INVESTMENT && ' The fee is fixed for the format as specified — no surprises once the brief is agreed.'}
               </p>
             </div>
-            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid gap-6 max-w-2xl">
               {FORMATS.map((f, i) => (
                 <FormatCard key={f.id} f={f} delay={i * 60} selected={brief.format === f.id} onSelect={selectFormat} />
               ))}
@@ -1347,7 +1220,7 @@ export default function App() {
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 mb-16">
               {[
-                ['300', 'Guests at the largest format'],
+                ['120', 'Guests at the largest room we build'],
                 ['75%', 'Target C-level and head-of'],
                 ['80%', 'Of your written guest criteria'],
                 ['1', 'Host per event — always'],

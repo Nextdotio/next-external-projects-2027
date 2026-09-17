@@ -24,7 +24,7 @@ and print a brochure or a filled-in brief straight from it.
 | --- | --- |
 | What this actually is | You host / we build and run / we fill the room, plus track record |
 | The 2027 calendar | Five slots against named summits; click one to start a brief |
-| Six formats | Reception, Dinner, Lounge, Hospitality Day, VIP Side Event, Flagship |
+| One format | Drinks Reception - the only format approved for sale |
 | The room is the product | How the guest list is built, and what the post-event report does and does not cover |
 | Brief to event in twelve weeks | Week-by-week build, response-time promise, commercial ground rules |
 | Build your brief | Summit + format + guest count → mailto or printable brief |
@@ -40,7 +40,7 @@ the **full brochure** (hero buttons and footer) and a **filled-in outline brief*
 - The External Projects 2027 strategy call, 20 August 2026 (Angelica, Rory, Will,
   Stuart, Ana, Pierre, Gerda)
 
-Specifically: the six formats are Appendix B; the calendar is slide 4; guest-list
+Specifically: the format is Appendix B; the calendar is slide 4; guest-list
 standards (300 guests, 75% C-level, 80% of agreed criteria, no blanket invites) are
 Rory's relationship KPIs; the twelve-week timeline and the WhatsApp invite journey are
 Angelica's event timeline; response times are Appendix B; the commercial ground rules
@@ -68,33 +68,31 @@ of these with us across four cities"). Get written permission before naming anyo
 - **300 guests / 75% C-level / 80% of criteria** — the standards Relationships commits
   to, not measured outcomes. Worded as targets throughout.
 
-## Indicative investment — read before sending this to anyone
+## Investment — one approved format, one approved fee
 
-Every figure on the page is **tied to a guest count**. A single "from" number invites
-the reading that a drinks reception costs €35k whether sixty people come or a hundred
-and twenty, which is wrong and would have been discovered in the first quote.
+**DECIDED (Desi + Gerda, 17 Sep 2026):** only one format is approved for sale, the
+**Drinks Reception at €35,000**. The other five formats have been removed from the
+brochure. They were never an approved price list - this README said so from the start
+("**They are not an approved price list**", Appendix B: the point is faster quoting,
+"not a published price list") - so the review confirmed what the provenance already
+recorded rather than contradicting it.
 
-Each format is a fixed **base** (venue, production, staffing, branding, guest list) plus
-a **per-guest rate** (food, drink, kit, transfers). The bases are set so
-`base + perGuest × min` reproduces that format's entry price:
+The fee is now modelled as a **fee, not a derived band**: `fee: 35000` and
+`feeCovers: 60` on the `reception` entry, with `baseCost`/`perGuest` set to null. An
+approved figure must never render as a ±8% range, so `fmtBand` short-circuits when a
+format carries a `fee`.
 
-| Format | Base | Per guest | Range |
-| --- | --- | --- | --- |
-| Drinks Reception | €24,200 | €180 | €35k @ 60 → €46k @ 120 |
-| Private Dinner | €36,000 | €450 | €45k @ 20 → €54k @ 40 |
-| Private Lounge | €39,000 | €200 | €55k @ 80 → €79k @ 200 |
-| Hospitality Day | €50,500 | €650 | €70k @ 30 → €103k @ 80 |
-| VIP Side Event | €50,500 | €230 | €85k @ 150 → €120k @ 300 |
-| Flagship Build | — | — | Quoted on brief |
+**Guard the margin.** €35,000 was the entry price at **60 guests** in the old model
+(€35k @ 60 rising to €46k @ 120, about €180 a guest in food, drink, kit and transfers).
+Quoting €35,000 flat for any room size would give away roughly €10,800 on a
+120-guest reception. So the fee is published as covering **up to 60 guests**, with
+larger rooms quoted on the brief - the card, the brief builder and both PDF exports all
+say so, and the brief builder adds an explicit "guests beyond the fee" line. If Desi
+intends €35,000 to cover 120 guests too, that is a margin decision to take knowingly,
+not a wording tweak.
 
-Displayed figures are a ±8% band rounded to the nearest €1,000, because Appendix B says
-that where the data is thin the quote shows a range. The **off-calendar** slot adds a
-**30% premium** on top (`premium` on that `SUMMITS` entry).
-
-These are derived from the delivered-event history in the deck (≈€90k average client
-spend; €139k and €58k averages for the two main hosts; a €50k standard build cited as a
-good deal). **They are not an approved price list**, and Appendix B is explicit that the
-point is faster quoting, "not a published price list".
+The **off-calendar** slot still adds a **30% premium** on top (`premium` on that
+`SUMMITS` entry).
 
 One flag controls all of it — `SHOW_INVESTMENT` at the top of `src/App.jsx`:
 

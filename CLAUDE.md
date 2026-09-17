@@ -31,10 +31,17 @@ Confirm it prints `Published` before reporting done.
   per-event costs or margins, client concentration, commission, pipeline maths, the
   readiness gate or open leadership decisions. Past clients are described, not named —
   naming one needs their written permission first.
-- **Prices scale with guest numbers.** Each format has a `baseCost` (venue, production,
-  staffing, guest list) plus a `perGuest` rate (food, drink, kit, transfers); the page
-  shows a ±8% band around `base + perGuest × guests`. Never reintroduce a flat "from"
-  figure on its own — it reads as a fixed price regardless of room size.
+- **One approved format only** (Desi + Gerda, 17 Sep 2026): the Drinks Reception at a
+  firm €35,000. The other five were removed - they were derived from delivered-event
+  history, never an approved rate card. Do not reinstate one without a written approval.
+- **The fee is a fee, not a band.** `fee: 35000` + `feeCovers: 60` on the format;
+  `fmtBand` short-circuits for any format carrying a `fee`, because an approved figure
+  must not render as a ±8% range. The old `baseCost`/`perGuest` model still works for any
+  future format that is genuinely guest-scaled.
+- **€35,000 covers up to 60 guests.** That was the 60-guest entry price in the old model
+  (~€180 a guest beyond it). Publishing it flat for any room size gives away ~€10,800 on
+  a 120-guest reception, so the card, brief builder and both PDFs all state the 60-guest
+  scope and quote larger rooms on the brief. Never drop that scope line.
 - **Prices are behind a flag.** `SHOW_INVESTMENT` at the top of `src/App.jsx` toggles
   every indicative figure on the cards, in the brief builder and in both printouts. The
   model is derived from delivered-event history, not an approved price list — see
@@ -44,7 +51,10 @@ Confirm it prints `Published` before reporting done.
   one `SUMMITS` entry.
 - **Two printables**, both generated client-side into a print window:
   `downloadBrochurePDF()` (hero + footer) and `downloadBriefPDF(brief)` (brief builder).
-- Claims are pitched at the conservative end on purpose: 13 events, 5 cities. The
+- Claims are pitched at the conservative end on purpose: 13 partner-hosted events
+  since 2024, 5 cities. The 900+ figure is different in kind - it is the founders'
+  lifetime output since Events by Martin, across two decades and the whole business,
+  not partner-hosted events. Keep the two clearly separated wherever they appear. The
   reasoning is in README.md — do not round them up.
 - The twelve-week section is an interactive timeline (`Timeline` in `src/App.jsx`) —
   a horizontal rail on desktop with arrow-key support, a vertical spine on mobile. Each
