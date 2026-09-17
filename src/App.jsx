@@ -1219,7 +1219,7 @@ export default function App() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
               {[
-                ['500+', 'Events delivered worldwide since Events by Martin'],
+                ['800+', 'Events delivered worldwide since Events by Martin'],
                 ['13', 'Partner-hosted events delivered since 2024'],
                 ['5', 'Host cities across Europe and the US'],
                 ['75%', 'Target C-level and head-of'],
@@ -1231,7 +1231,7 @@ export default function App() {
               ))}
             </div>
             <p data-anim style={anim} className="text-brand-gray text-sm mt-7 max-w-3xl leading-relaxed">
-              The founders of Events by Martin have produced more than 500 events around the world across two decades,
+              The founders of Events by Martin have produced more than 800 events around the world across two decades,
               a track record that became NEXT.io and now NEXTPredict. The thirteen above are the partner-hosted events
               we have delivered since 2024: Rome, Barcelona, Malta, London and SBC Summit Americas in Florida. Our
               longest-standing host has run seven of them with us across four cities — which is the number we would

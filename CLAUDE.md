@@ -65,7 +65,7 @@ Confirm it prints `Published` before reporting done.
 - **Two printables**, both generated client-side into a print window:
   `downloadBrochurePDF()` (hero + footer) and `downloadBriefPDF(brief)` (brief builder).
 - Claims are pitched at the conservative end on purpose: 13 partner-hosted events
-  since 2024, 5 cities. The 500+ figure is different in kind - it is the founders'
+  since 2024, 5 cities. The 800+ figure is different in kind - it is the founders'
   lifetime output since Events by Martin, across two decades and the whole business,
   not partner-hosted events. Keep the two clearly separated wherever they appear. The
   reasoning is in README.md — do not round them up.
