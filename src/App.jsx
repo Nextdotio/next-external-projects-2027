@@ -529,6 +529,118 @@ function Eyebrow({ children }) {
   )
 }
 
+// ─── Featured format ──────────────────────────────────────────────────────
+// Used when the card carries a single approved format: a full-width spread
+// rather than one portrait card stranded in a grid. FormatCard's grid layout
+// is kept for the day a second format is approved.
+function FormatFeature({ f, onSelect, selected }) {
+  const Icon = f.icon
+  const entry = indicative(f, f.min)
+
+  return (
+    <div
+      data-anim
+      style={anim}
+      className={`rounded-[2rem] overflow-hidden grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] ${
+        selected ? 'glass-gold' : 'glass'
+      }`}
+    >
+      {/* Photography */}
+      <div className="relative min-h-[19rem] lg:min-h-[34rem]">
+        <img alt={f.name} src={`${base}images/${f.img}`} className="absolute inset-0 w-full h-full object-cover opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/50 to-brand-dark/5" />
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-yellow/12 via-transparent to-transparent" />
+        <div className="hidden lg:block absolute inset-y-0 right-0 w-36 bg-gradient-to-r from-transparent to-brand-dark/95" />
+        <div className="absolute inset-x-0 bottom-0 p-8 lg:p-10">
+          <div className="flex items-center gap-2.5 mb-3">
+            <Icon className="w-5 h-5 text-brand-yellow" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-yellow/90">The approved format</span>
+          </div>
+          <h3 className="text-3xl md:text-4xl font-bold uppercase tracking-tight leading-[1.05] mb-2">{f.name}</h3>
+          <p className="text-brand-champagne/90 italic">{f.tagline}</p>
+        </div>
+      </div>
+
+      {/* Detail */}
+      <div className="p-8 lg:p-10 flex flex-col">
+        <div className="flex flex-wrap gap-2 mb-6 text-[10px] uppercase tracking-[0.15em] font-bold">
+          <span className="flex items-center gap-1.5 bg-brand-white/6 border border-brand-white/10 rounded-full px-3.5 py-2">
+            <Users className="w-3.5 h-3.5 text-brand-yellow" />{f.guests}
+          </span>
+          <span className="flex items-center gap-1.5 bg-brand-white/6 border border-brand-white/10 rounded-full px-3.5 py-2">
+            <Clock className="w-3.5 h-3.5 text-brand-yellow" />{f.notice}
+          </span>
+          <span className="flex items-center gap-1.5 bg-brand-white/6 border border-brand-white/10 rounded-full px-3.5 py-2">
+            <Sparkles className="w-3.5 h-3.5 text-brand-yellow" />{f.duration}
+          </span>
+        </div>
+
+        <p className="text-brand-gray leading-relaxed mb-8">
+          <span className="text-brand-white font-semibold">Best for: </span>{f.bestFor}
+        </p>
+
+        <p className="text-[10px] uppercase tracking-[0.25em] text-brand-gray mb-4">
+          {f.fee != null ? 'What the fee covers' : 'What is included'}
+        </p>
+        <ul className="grid sm:grid-cols-2 gap-x-7 gap-y-2.5 mb-8">
+          {f.included.map((i) => (
+            <li key={i} className="flex gap-2.5 text-sm text-brand-white/90 leading-snug">
+              <Check className="w-4 h-4 text-brand-yellow shrink-0 mt-0.5" />{i}
+            </li>
+          ))}
+        </ul>
+
+        <div className="rounded-2xl bg-brand-dark/60 border border-brand-white/8 p-5 mb-8">
+          <p className="text-[10px] uppercase tracking-[0.25em] text-brand-gray mb-3">Not included</p>
+          <ul className="grid sm:grid-cols-3 gap-x-6 gap-y-2">
+            {f.excluded.map((i) => (
+              <li key={i} className="flex gap-2.5 text-sm text-brand-gray leading-snug">
+                <Ban className="w-4 h-4 text-brand-gray/60 shrink-0 mt-0.5" />{i}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mt-auto flex flex-col sm:flex-row sm:items-end gap-6 justify-between">
+          {SHOW_INVESTMENT && (
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.25em] text-brand-gray mb-2">{f.fee != null ? 'Investment' : 'Indicative investment'}</p>
+              {entry == null ? (
+                <>
+                  <p className="text-4xl font-bold gold-text leading-none">Quoted on brief</p>
+                  <p className="text-[11px] text-brand-gray mt-2.5">{f.duration} · scoped before it is priced</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-4xl font-bold gold-text leading-none">{fmtPrice(roundTo(entry, 1000))}</p>
+                  <p className="text-[11px] text-brand-gray mt-2.5 leading-relaxed max-w-md">
+                    {f.fee != null
+                      ? <>A fixed fee for the format as specified, covering up to <span className="text-brand-white font-semibold">{f.feeCovers} guests</span>. Larger rooms are quoted on the brief.</>
+                      : <>at {f.min} guests, then about <span className="text-brand-white font-semibold">{fmtPrice(f.perGuest)} a guest</span> on top — roughly {fmtPrice(roundTo(indicative(f, f.max), 1000))} at {f.max}.</>}
+                  </p>
+                </>
+              )}
+            </div>
+          )}
+
+          <button
+            onClick={() => onSelect(f.id)}
+            className={`shrink-0 rounded-full px-9 py-4 font-bold text-[11px] uppercase tracking-[0.2em] transition-colors ${
+              selected
+                ? 'bg-brand-yellow text-brand-dark'
+                : 'bg-brand-white/8 text-brand-white hover:bg-brand-yellow hover:text-brand-dark'
+            } ${SHOW_INVESTMENT ? '' : 'w-full'}`}
+          >
+            {selected
+              ? <span className="flex items-center justify-center gap-2"><CircleCheck className="w-4 h-4" />In your brief</span>
+              : 'Add to brief'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Format card ──────────────────────────────────────────────────────────
 function FormatCard({ f, onSelect, selected, delay }) {
   const [open, setOpen] = useState(false)
@@ -1195,11 +1307,15 @@ export default function App() {
                 {SHOW_INVESTMENT && ' The fee is fixed for the format as specified — no surprises once the brief is agreed.'}
               </p>
             </div>
-            <div className="grid gap-6 max-w-2xl">
-              {FORMATS.map((f, i) => (
-                <FormatCard key={f.id} f={f} delay={i * 60} selected={brief.format === f.id} onSelect={selectFormat} />
-              ))}
-            </div>
+            {FORMATS.length === 1 ? (
+              <FormatFeature f={FORMATS[0]} selected={brief.format === FORMATS[0].id} onSelect={selectFormat} />
+            ) : (
+              <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {FORMATS.map((f, i) => (
+                  <FormatCard key={f.id} f={f} delay={i * 60} selected={brief.format === f.id} onSelect={selectFormat} />
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
