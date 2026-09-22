@@ -4,7 +4,7 @@ Single-page React (Vite + Tailwind) brochure for **External Projects**: partner-
 VIP events that NEXT.io builds and runs alongside the major iGaming summits, with one
 host per event.
 
-**Live:** https://stuatnext.github.io/next-external-projects-2027/
+**Live:** https://nextdotio.github.io/next-external-projects-2027/
 
 > **One-time setup still needed.** `npm run deploy` has pushed the built site to the
 > `gh-pages` branch, but GitHub Pages has never been switched on for this repo, so the
