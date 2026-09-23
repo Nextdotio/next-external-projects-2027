@@ -367,7 +367,7 @@ function downloadBriefPDF(brief) {
       ${row('Occasion', smt ? (smt.id === 'offcal' ? 'Off-calendar — your own city and date' : `${smt.name} — ${smt.city}`) : 'To be discussed')}
       ${row('Dates', smt ? smt.dates : 'To be discussed')}
       ${row('Format', fmt ? fmt.name : 'To be discussed')}
-      ${row('Guest numbers', fmt ? `approx. ${brief.guests}` : 'To be discussed')}
+      ${row('Guest numbers', fmt ? `approx. ${brief.guests} · the room runs ${fmt.min} to ${fmt.max}` : 'To be discussed')}
       ${row('Minimum lead time', fmt ? fmt.notice : '8–16 weeks depending on format')}
       ${SHOW_INVESTMENT ? row(fmt && fmt.fee != null ? `Fee, covering ${fmt.feeCovers} guests` : `Indicative at ${fmt ? brief.guests : '—'} guests`, est ? fmtBand(est, fmt) : 'Quoted on brief') : ''}
       ${SHOW_INVESTMENT && fmt && overCount(fmt, brief.guests) ? row('Guests beyond the fee', `${overCount(fmt, brief.guests)} - catering quoted on the brief`) : ''}
