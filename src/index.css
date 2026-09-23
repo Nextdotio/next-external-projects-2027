@@ -8,7 +8,9 @@
   --color-brand-ink: #131317;
   --color-brand-white: #ffffff;
   --color-brand-gray: #a2a2ab;
-  --font-family-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  /* Tailwind v4 reads --font-sans; the v3 name (--font-family-sans) is ignored,
+     which left `font-sans` on the system stack and Inter downloaded but unused. */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {

@@ -317,7 +317,7 @@ function buildMailto(brief) {
     'Please come back with venue options and a proposal.',
     '',
     'Kind regards,',
-  ].filter(Boolean)
+  ].filter((l) => l != null) // drop the conditional lines, keep the blank ones
   return `mailto:sales@next.io?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join('\r\n'))}`
 }
 
@@ -349,7 +349,7 @@ function downloadBriefPDF(brief) {
     td{padding:11px 16px;border-bottom:1px solid #e8e8e8;font-weight:600}
     ul{padding-left:18px;margin-top:4px}
     li{margin-bottom:4px}
-    ul.out li{color:#8a1c1c}
+    ul.out li{color:#6b6b6b}
     .two{display:flex;gap:32px}
     .two>div{flex:1}
     .fill{border:1px dashed #c9c9c9;border-radius:6px;padding:14px 16px;min-height:88px;color:#aaa;font-style:italic}
@@ -465,7 +465,7 @@ function downloadBrochurePDF() {
     .ch{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999;margin-bottom:4px}
     ul{padding-left:16px}
     li{margin-bottom:3px}
-    ul.out li{color:#8a1c1c}
+    ul.out li{color:#6b6b6b}
     ol{padding-left:18px}
     ol li{margin-bottom:6px}
     .foot{padding:24px 48px 40px;border-top:3px solid #ffcf33;margin-top:24px;color:#666;font-size:11px;line-height:1.75}
@@ -525,6 +525,41 @@ function useScrollAnimation() {
 
 const anim = { opacity: 0, transform: 'translateY(24px)', transition: 'opacity .7s ease, transform .7s ease' }
 
+// ─── Calendar date tile ───────────────────────────────────────────────────
+// Month over day range, like a calendar leaf. The day range is read from the
+// display string, so SUMMITS stays the one source of truth for dates and both
+// printables keep reading the same fields. Undated slots fall back to a word.
+const dayRange = (s) => {
+  const m = /^(\d{1,2}(?:\s*[–-]\s*\d{1,2})?)\s+[A-Za-z]+\s+\d{4}$/.exec(s.dates)
+  return m ? m[1].replace(/\s*[–-]\s*/, '–') : null
+}
+
+function DateTile({ s, chosen }) {
+  const days = dayRange(s)
+  const premium = s.premium > 0
+  return (
+    <span
+      aria-hidden="true"
+      className={`flex flex-col w-[4.5rem] sm:w-24 shrink-0 rounded-2xl overflow-hidden border text-center transition-colors duration-300 ${
+        chosen ? 'border-brand-yellow/70' : premium ? 'border-brand-yellow/35' : 'border-brand-white/10 group-hover:border-brand-yellow/40'
+      } ${premium ? 'bg-brand-yellow/[0.06]' : 'bg-brand-dark/60'}`}
+    >
+      <span className="block py-1.5 pl-[0.25em] text-[10px] font-bold uppercase tracking-[0.25em] text-brand-yellow bg-brand-yellow/10 border-b border-brand-yellow/15">
+        {s.month}
+      </span>
+      <span
+        className={`flex items-center justify-center h-11 sm:h-14 font-bold leading-none ${
+          days
+            ? 'text-lg sm:text-2xl tabular-nums tracking-tight text-brand-white'
+            : `text-[13px] sm:text-base uppercase tracking-[0.08em] pl-[0.08em] ${premium ? 'gold-text' : 'text-brand-white/75'}`
+        }`}
+      >
+        {days || (s.status === 'tbc' ? 'TBC' : 'Date')}
+      </span>
+    </span>
+  )
+}
+
 // ─── Section eyebrow ──────────────────────────────────────────────────────
 function Eyebrow({ children }) {
   return (
@@ -534,6 +569,14 @@ function Eyebrow({ children }) {
     </div>
   )
 }
+
+// ─── Format photography crop ─────────────────────────────────────────────
+// The Valletta 2025 photography has a sponsor bar burned into the bottom sixth
+// of the frame (it starts at y=1429 of 1707, 83.7%), which put a partner's logo
+// under the format title. The image is sized to 140% of its panel and lifted by
+// 14%, so the panel shows roughly 10%-81% of the frame at any aspect ratio: the
+// bar never shows and less of the empty night sky does.
+const PHOTO_CROP = '-top-[14%] h-[140%] object-cover'
 
 // ─── Featured format ──────────────────────────────────────────────────────
 // Used when the card carries a single approved format: a full-width spread
@@ -552,8 +595,8 @@ function FormatFeature({ f, onSelect, selected }) {
       }`}
     >
       {/* Photography */}
-      <div className="relative min-h-[19rem] lg:min-h-[34rem]">
-        <img alt={f.name} src={`${base}images/${f.img}`} className="absolute inset-0 w-full h-full object-cover opacity-90" />
+      <div className="relative min-h-[19rem] lg:min-h-[34rem] overflow-hidden">
+        <img alt={f.name} src={`${base}images/${f.img}`} className={`absolute inset-x-0 w-full ${PHOTO_CROP} opacity-90`} />
         <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/50 to-brand-dark/5" />
         <div className="absolute inset-0 bg-gradient-to-br from-brand-yellow/12 via-transparent to-transparent" />
         <div className="hidden lg:block absolute inset-y-0 right-0 w-36 bg-gradient-to-r from-transparent to-brand-dark/95" />
@@ -660,8 +703,8 @@ function FormatCard({ f, onSelect, selected, delay }) {
         selected ? 'glass-gold' : 'glass hover:border-brand-yellow/45'
       }`}
     >
-      <div className="relative h-56 shrink-0">
-        <img alt={f.name} src={`${base}images/${f.img}`} className="w-full h-full object-cover opacity-85" />
+      <div className="relative h-56 shrink-0 overflow-hidden">
+        <img alt={f.name} src={`${base}images/${f.img}`} className={`absolute inset-x-0 w-full ${PHOTO_CROP} opacity-85`} />
         <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/45 to-brand-dark/5" />
         <div className="absolute inset-0 bg-gradient-to-br from-brand-yellow/10 via-transparent to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6">
@@ -1139,10 +1182,10 @@ export default function App() {
           <div className="spill w-[38rem] h-[38rem] -top-40 left-1/2 -translate-x-1/2 opacity-70 shimmer" />
 
           <div className="z-10 text-center max-w-5xl px-6 sm:px-8 w-full">
-            <div className="flex items-center justify-center gap-4 mb-8">
-              <span className="gold-rule w-12 rotate-180" />
-              <p className="text-brand-yellow/90 font-bold uppercase tracking-[0.45em] text-[10px] sm:text-xs">External Projects · 2027</p>
-              <span className="gold-rule w-12" />
+            <div className="flex items-center justify-center gap-3 sm:gap-4 mb-8">
+              <span className="gold-rule w-8 sm:w-12 rotate-180 shrink-0" />
+              <p className="text-brand-yellow/90 font-bold uppercase tracking-[0.3em] sm:tracking-[0.45em] text-[10px] sm:text-xs whitespace-nowrap">External Projects · 2027</p>
+              <span className="gold-rule w-8 sm:w-12 shrink-0" />
             </div>
             <h1 className="text-5xl sm:text-7xl lg:text-[7.5rem] font-bold tracking-[-0.04em] uppercase leading-[0.86] mb-8">
               Your Event.<br /><span className="gold-text">Our Room.</span>
@@ -1159,7 +1202,7 @@ export default function App() {
                 [Users, `Up to ${MAX_GUESTS} curated guests`],
                 [BadgeCheck, '75% C-level target'],
               ].map(([Icon, label]) => (
-                <span key={label} className="flex items-center gap-2 glass rounded-full py-2.5 px-5">
+                <span key={label} className="flex items-center gap-2 glass rounded-full py-2.5 px-4 whitespace-nowrap">
                   <Icon className="w-3.5 h-3.5 text-brand-yellow" />{label}
                 </span>
               ))}
@@ -1255,50 +1298,66 @@ export default function App() {
               </p>
             </div>
 
-            <div className="space-y-3">
+            {/* Agenda: date tile · summit and city · note · status. Fixed column
+                widths so every row lines up like a table at desktop; on a phone
+                the note and status drop under the tile and name. */}
+            <ul className="space-y-3">
               {SUMMITS.map((s, i) => {
                 const st = STATUS_STYLE[s.status]
                 const chosen = brief.summit === s.id
                 const isPremium = s.premium > 0
                 return (
-                  <button
-                    key={s.id}
-                    onClick={() => { setBrief((b) => ({ ...b, summit: s.id })); document.getElementById('brief')?.scrollIntoView({ behavior: 'smooth' }) }}
-                    data-anim
-                    style={{ ...anim, transitionDelay: `${i * 70}ms` }}
-                    className={`w-full text-left rounded-3xl p-7 md:p-8 lift grid md:grid-cols-12 gap-4 md:gap-6 items-center ${
-                      chosen ? 'glass-gold' : isPremium ? 'glass-gold hover:border-brand-yellow' : 'glass hover:border-brand-yellow/45'
-                    }`}
-                  >
-                    <div className="md:col-span-1">
-                      <span className={`text-2xl font-bold tracking-tight ${isPremium ? 'gold-text' : 'text-brand-yellow'}`}>{s.month}</span>
-                    </div>
-                    <div className="md:col-span-3">
-                      <h3 className="text-xl font-bold uppercase leading-tight tracking-tight">{s.name}</h3>
-                      <p className="text-brand-gray text-sm flex items-center gap-1.5 mt-1">
-                        <MapPin className="w-3.5 h-3.5 text-brand-yellow" />{s.city}
-                      </p>
-                    </div>
-                    <div className="md:col-span-2">
-                      <p className="text-sm font-semibold">{s.dates}</p>
-                      {isPremium && (
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-brand-champagne mt-1.5">
-                          +{Math.round(s.premium * 100)}% premium
-                        </p>
-                      )}
-                    </div>
-                    <div className="md:col-span-4">
-                      <p className="text-brand-gray text-sm leading-snug">{s.note}</p>
-                    </div>
-                    <div className="md:col-span-2 md:text-right">
-                      <span className={`inline-block text-[9px] font-bold uppercase tracking-[0.2em] rounded-full px-3.5 py-2 ${st.cls}`}>
-                        {st.label}
+                  <li key={s.id}>
+                    <button
+                      onClick={() => { setBrief((b) => ({ ...b, summit: s.id })); document.getElementById('brief')?.scrollIntoView({ behavior: 'smooth' }) }}
+                      data-anim
+                      style={{ ...anim, transitionDelay: `${i * 70}ms` }}
+                      className={`group w-full text-left rounded-3xl p-5 sm:p-6 xl:px-7 lift grid grid-cols-[auto_minmax(0,1fr)] md:grid-cols-[auto_minmax(0,1fr)_12rem] xl:grid-cols-[auto_17rem_minmax(0,1fr)_12rem] gap-x-5 sm:gap-x-7 gap-y-4 md:gap-y-2 xl:gap-y-0 items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-yellow ${
+                        chosen ? 'glass-gold shadow-[0_0_0_1px_rgba(255,207,51,0.5)]' : 'glass hover:border-brand-yellow/45'
+                      }`}
+                    >
+                      <span className="col-start-1 row-start-1 md:row-span-2 xl:row-span-1">
+                        <DateTile s={s} chosen={chosen} />
                       </span>
-                    </div>
-                  </button>
+
+                      <span className="col-start-2 row-start-1 min-w-0 md:self-end xl:self-center">
+                        <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                          <span className="text-lg sm:text-xl font-bold uppercase leading-tight tracking-tight">{s.name}</span>
+                          {isPremium && (
+                            <span className="text-[9px] font-bold uppercase tracking-[0.15em] tabular-nums text-brand-champagne border border-brand-yellow/50 rounded-full px-2 py-0.5">
+                              +{Math.round(s.premium * 100)}%
+                            </span>
+                          )}
+                        </span>
+                        <span className="flex items-center gap-1.5 mt-1.5 text-sm text-brand-gray">
+                          <MapPin className="w-3.5 h-3.5 text-brand-yellow shrink-0" />{s.city}
+                        </span>
+                        <span className="sr-only">{s.dates}</span>
+                      </span>
+
+                      <span className="col-span-2 row-start-2 md:col-span-1 md:col-start-2 md:self-start xl:col-start-3 xl:row-start-1 xl:self-center text-brand-gray text-sm leading-relaxed">
+                        {s.note}
+                      </span>
+
+                      <span className="col-span-2 row-start-3 md:col-span-1 md:col-start-3 md:row-start-1 md:row-span-2 xl:col-start-4 xl:row-span-1 flex md:flex-col items-center md:items-end justify-between gap-3 pt-4 md:pt-0 border-t border-brand-white/8 md:border-0">
+                        <span className={`inline-flex items-center whitespace-nowrap text-[9px] font-bold uppercase tracking-[0.2em] rounded-full px-3.5 py-2 ${st.cls}`}>
+                          {st.label}
+                        </span>
+                        {chosen ? (
+                          <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">
+                            <CircleCheck className="w-3.5 h-3.5" />In your brief
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.2em] text-brand-gray group-hover:text-brand-yellow transition-colors">
+                            Start a brief<ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+                          </span>
+                        )}
+                      </span>
+                    </button>
+                  </li>
                 )
               })}
-            </div>
+            </ul>
             <p data-anim style={anim} className="text-brand-gray text-sm mt-7 max-w-4xl leading-relaxed">
               Summit dates are as published by the organisers and are confirmed with them before anything is booked.
               Off-calendar builds are priced at a premium because outside a summit week nothing is shared — crew and
@@ -1434,15 +1493,18 @@ export default function App() {
                 Waiting three weeks for a number is what kills these conversations. These are working days, from the
                 point we have what we have asked you for.
               </p>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+              {/* A row on a phone (figure left, copy right), a card from sm up. */}
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
                 {RESPONSE.map((r, i) => (
-                  <div key={r.t} data-anim style={{ ...anim, transitionDelay: `${i * 80}ms` }} className="glass-gold lift rounded-3xl p-7">
-                    <div className="flex items-baseline gap-2 mb-4">
-                      <span className="text-5xl font-bold gold-text leading-none">{r.d}</span>
-                      <span className="text-[10px] uppercase tracking-[0.2em] text-brand-gray">working {r.d === '1' ? 'day' : 'days'}</span>
+                  <div key={r.t} data-anim style={{ ...anim, transitionDelay: `${i * 80}ms` }} className="glass-gold lift rounded-3xl p-6 sm:p-7 flex gap-5 sm:block">
+                    <div className="flex flex-col items-center sm:flex-row sm:items-baseline gap-2 w-16 sm:w-auto shrink-0 sm:mb-4 text-center sm:text-left">
+                      <span className="text-5xl font-bold gold-text leading-none tabular-nums">{r.d}</span>
+                      <span className="text-[10px] uppercase tracking-[0.2em] leading-snug text-brand-gray">working {r.d === '1' ? 'day' : 'days'}</span>
                     </div>
-                    <h4 className="font-bold uppercase mb-2.5 leading-tight tracking-tight">{r.t}</h4>
-                    <p className="text-brand-gray text-sm leading-relaxed">{r.b}</p>
+                    <div className="min-w-0">
+                      <h4 className="font-bold uppercase mb-2 sm:mb-2.5 leading-tight tracking-tight">{r.t}</h4>
+                      <p className="text-brand-gray text-sm leading-relaxed">{r.b}</p>
+                    </div>
                   </div>
                 ))}
               </div>
