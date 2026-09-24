@@ -1,9 +1,9 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import {
   Mail, Globe, CalendarDays, MapPin, Users, Sparkles, CircleCheck, Download,
   ArrowRight, ArrowLeft, Clock, ShieldCheck, FileText, Wine, Trophy, Building2,
   Check, Target, Send, Coffee, UtensilsCrossed, PartyPopper, Ban, ClipboardList,
-  BadgeCheck, Crown, Route, Gauge, UserCheck, Eye, ChevronDown,
+  BadgeCheck, Crown, Route, Gauge, UserCheck, Eye, ChevronDown, Menu, X,
 } from 'lucide-react'
 
 const base = import.meta.env.BASE_URL
@@ -42,6 +42,19 @@ const fmtBand = (n, f) => {
   const [lo, hi] = bandFor(n)
   return `${fmtPrice(lo)} – ${fmtPrice(hi)}`
 }
+
+// The line that travels with a format's entry figure wherever it is quoted in short:
+// for a fee, the guests it covers and the room ceiling together (CLAUDE.md - one
+// without the other either caps the sale or gives the build away). The printed
+// brochure and the first-screen panel both read it, so they cannot drift apart.
+const feeScope = (f) => (f.fee != null
+  ? `A fixed fee covering up to ${f.feeCovers} guests · rooms to ${f.max} quoted on the brief`
+  : `${f.min} guests to ${f.max} guests · about €${f.perGuest} a guest either way`)
+
+// House rule: NEXT.io and NEXTPredict keep their own casing, even inside a heading
+// that CSS sets in capitals (never NEXT.IO). Wrap data strings that render uppercase.
+const brandCase = (s) => String(s).split(/(NEXT\.io|NEXTPredict)/).map((part, i) =>
+  (i % 2 ? <span key={i} className="normal-case">{part}</span> : part))
 
 // ─── 2027 calendar ────────────────────────────────────────────────────────
 // status: 'open' | 'interest' | 'tbc' | 'premium'
@@ -340,6 +353,7 @@ function downloadBriefPDF(brief) {
     .header{background:#0b0b0d;color:#fff;padding:44px 48px 36px}
     .logo{font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:-0.5px}
     .logo span{color:#ffcf33}
+    .logo .io{text-transform:none}
     .sub{color:#999;font-size:13px;margin-top:6px}
     .body{padding:36px 48px}
     .label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#999;margin:28px 0 12px}
@@ -358,7 +372,7 @@ function downloadBriefPDF(brief) {
     @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
   </style></head><body>
   <div class="header">
-    <div class="logo">NEXT<span>.io</span> External Projects <span>2027</span></div>
+    <div class="logo">NEXT<span class="io">.io</span> External Projects <span>2027</span></div>
     <div class="sub">Outline Event Brief &nbsp;&middot;&nbsp; Prepared ${date}</div>
   </div>
   <div class="body">
@@ -418,8 +432,7 @@ function downloadBrochurePDF() {
       : lo == null ? 'POA'
       : f.fee != null ? eur(lo)
       : `${eur(lo)} – ${eur(hi)}`
-    const scale = SHOW_INVESTMENT && lo != null
-      ? `<div class="scale">${esc(f.fee != null ? `A fixed fee covering up to ${f.feeCovers} guests · rooms to ${f.max} quoted on the brief` : `${f.min} guests to ${f.max} guests · about €${f.perGuest} a guest either way`)}</div>` : ''
+    const scale = SHOW_INVESTMENT && lo != null ? `<div class="scale">${esc(feeScope(f))}</div>` : ''
     return `<div class="fmt">
       <div class="fhead">
         <div><h3>${esc(f.name)}</h3><div class="mut">${esc(f.tagline)}</div></div>
@@ -444,6 +457,7 @@ function downloadBrochurePDF() {
     .cover{background:#0b0b0d;color:#fff;padding:56px 48px}
     .cover h1{font-size:30px;font-weight:900;text-transform:uppercase;letter-spacing:-0.5px}
     .cover h1 span{color:#ffcf33}
+    .cover h1 .io{text-transform:none}
     .cover .tag{font-size:15px;color:#ffcf33;font-weight:700;margin-top:10px}
     .cover p{color:#aaa;margin-top:10px;font-size:12.5px;max-width:640px;line-height:1.7}
     section{padding:26px 48px 6px}
@@ -473,7 +487,7 @@ function downloadBrochurePDF() {
     @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
   </style></head><body>
   <div class="cover">
-    <h1>NEXT<span>.io</span> External Projects <span>2027</span></h1>
+    <h1>NEXT<span class="io">.io</span> External Projects <span>2027</span></h1>
     <div class="tag">Your event. Our room.</div>
     <p>Partner-funded VIP events, built and run by NEXT.io alongside the summits your buyers already attend — or wrapped around a date and a city of your own. You host it and it carries your brand alone. We find the venue, build it, fill the room from our network, run it on the night and report on who was actually there.</p>
   </div>
@@ -534,24 +548,29 @@ const dayRange = (s) => {
   return m ? m[1].replace(/\s*[–-]\s*/, '–') : null
 }
 
-function DateTile({ s, chosen }) {
+// `compact` is the small leaf used in the first-screen panel.
+function DateTile({ s, chosen, compact = false }) {
   const days = dayRange(s)
   const premium = s.premium > 0
   return (
     <span
       aria-hidden="true"
-      className={`flex flex-col w-[4.5rem] sm:w-24 shrink-0 rounded-2xl overflow-hidden border text-center transition-colors duration-300 ${
+      className={`flex flex-col shrink-0 overflow-hidden border text-center transition-colors duration-300 ${
+        compact ? 'w-12 sm:w-full rounded-xl' : 'w-[4.5rem] sm:w-24 rounded-2xl'
+      } ${
         chosen ? 'border-brand-yellow/70' : premium ? 'border-brand-yellow/35' : 'border-brand-white/10 group-hover:border-brand-yellow/40'
       } ${premium ? 'bg-brand-yellow/[0.06]' : 'bg-brand-dark/60'}`}
     >
-      <span className="block py-1.5 pl-[0.25em] text-[10px] font-bold uppercase tracking-[0.25em] text-brand-yellow bg-brand-yellow/10 border-b border-brand-yellow/15">
+      <span className={`block font-bold uppercase text-brand-yellow bg-brand-yellow/10 border-b border-brand-yellow/15 ${
+        compact ? 'py-1 pl-[0.2em] text-[9px] tracking-[0.2em]' : 'py-1.5 pl-[0.25em] text-[10px] tracking-[0.25em]'
+      }`}>
         {s.month}
       </span>
       <span
-        className={`flex items-center justify-center h-11 sm:h-14 font-bold leading-none ${
+        className={`flex items-center justify-center font-bold leading-none ${compact ? 'h-8 sm:h-10' : 'h-11 sm:h-14'} ${
           days
-            ? 'text-lg sm:text-2xl tabular-nums tracking-tight text-brand-white'
-            : `text-[13px] sm:text-base uppercase tracking-[0.08em] pl-[0.08em] ${premium ? 'gold-text' : 'text-brand-white/75'}`
+            ? `${compact ? 'text-[13px] sm:text-lg' : 'text-lg sm:text-2xl'} tabular-nums tracking-tight text-brand-white`
+            : `${compact ? 'text-[10px] sm:text-xs' : 'text-[13px] sm:text-base'} uppercase tracking-[0.08em] pl-[0.08em] ${premium ? 'gold-text' : 'text-brand-white/75'}`
         }`}
       >
         {days || (s.status === 'tbc' ? 'TBC' : 'Date')}
@@ -600,7 +619,7 @@ function FormatFeature({ f, onSelect, selected }) {
         <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/50 to-brand-dark/5" />
         <div className="absolute inset-0 bg-gradient-to-br from-brand-yellow/12 via-transparent to-transparent" />
         <div className="hidden lg:block absolute inset-y-0 right-0 w-36 bg-gradient-to-r from-transparent to-brand-dark/95" />
-        <div className="absolute inset-x-0 bottom-0 p-8 lg:p-10">
+        <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8 lg:p-10">
           <div className="flex items-center gap-3 mb-2">
             <Icon className="w-7 h-7 text-brand-yellow shrink-0" />
             <h3 className="text-3xl md:text-4xl font-bold uppercase tracking-tight leading-[1.05]">{f.name}</h3>
@@ -610,18 +629,16 @@ function FormatFeature({ f, onSelect, selected }) {
       </div>
 
       {/* Detail */}
-      <div className="p-8 lg:p-10 flex flex-col">
-        <div className="flex flex-wrap gap-2 mb-6 text-[10px] uppercase tracking-[0.15em] font-bold">
-          <span className="flex items-center gap-1.5 bg-brand-white/6 border border-brand-white/10 rounded-full px-3.5 py-2">
-            <Users className="w-3.5 h-3.5 text-brand-yellow" />{f.guests}
-          </span>
-          <span className="flex items-center gap-1.5 bg-brand-white/6 border border-brand-white/10 rounded-full px-3.5 py-2">
-            <Clock className="w-3.5 h-3.5 text-brand-yellow" />{f.notice}
-          </span>
-          <span className="flex items-center gap-1.5 bg-brand-white/6 border border-brand-white/10 rounded-full px-3.5 py-2">
-            <Sparkles className="w-3.5 h-3.5 text-brand-yellow" />{f.duration}
-          </span>
-        </div>
+      <div className="p-6 sm:p-8 lg:p-10 flex flex-col">
+        {/* A spec line rather than three pills: pills that wrap leave one stranded on
+            a row of its own; a line of specs wraps like text. */}
+        <ul className="flex flex-wrap gap-x-6 gap-y-2.5 pb-6 mb-6 border-b border-brand-white/8 text-[10px] uppercase tracking-[0.14em] font-bold text-brand-white/85">
+          {[[Users, f.guests], [Clock, f.notice], [Sparkles, f.duration]].map(([SpecIcon, t]) => (
+            <li key={t} className="flex items-center gap-2 whitespace-nowrap">
+              <SpecIcon className="w-3.5 h-3.5 text-brand-yellow shrink-0" />{t}
+            </li>
+          ))}
+        </ul>
 
         <p className="text-brand-gray leading-relaxed mb-8">
           <span className="text-brand-white font-semibold">Best for: </span>{f.bestFor}
@@ -630,9 +647,11 @@ function FormatFeature({ f, onSelect, selected }) {
         <p className="text-[10px] uppercase tracking-[0.25em] text-brand-gray mb-4">
           {f.fee != null ? 'What the fee covers' : 'What is included'}
         </p>
-        <ul className="grid sm:grid-cols-2 gap-x-7 gap-y-2.5 mb-8">
+        {/* Newspaper columns: nine items read down then across, instead of a grid
+            whose last row holds one item and an empty half. */}
+        <ul className="sm:columns-2 gap-x-7 mb-8">
           {f.included.map((i) => (
-            <li key={i} className="flex gap-2.5 text-sm text-brand-white/90 leading-snug">
+            <li key={i} className="flex gap-2.5 text-sm text-brand-white/90 leading-snug mb-2.5 break-inside-avoid">
               <Check className="w-4 h-4 text-brand-yellow shrink-0 mt-0.5" />{i}
             </li>
           ))}
@@ -673,10 +692,10 @@ function FormatFeature({ f, onSelect, selected }) {
 
           <button
             onClick={() => onSelect(f.id)}
-            className={`shrink-0 rounded-full px-9 py-4 font-bold text-[11px] uppercase tracking-[0.2em] transition-colors ${
+            className={`shrink-0 rounded-full px-9 py-4 font-bold text-[11px] uppercase tracking-[0.2em] border transition-colors ${
               selected
-                ? 'bg-brand-yellow text-brand-dark'
-                : 'bg-brand-white/8 text-brand-white hover:bg-brand-yellow hover:text-brand-dark'
+                ? 'bg-brand-yellow border-brand-yellow text-brand-dark'
+                : 'border-brand-yellow/60 text-brand-yellow hover:bg-brand-yellow hover:text-brand-dark'
             } ${SHOW_INVESTMENT ? '' : 'w-full'}`}
           >
             {selected
@@ -802,11 +821,15 @@ function FormatCard({ f, onSelect, selected, delay }) {
 function Timeline() {
   const [active, setActive] = useState(0)
   const last = TIMELINE.length - 1
-  const step = TIMELINE[active]
-  const pct = (active / last) * 100
+  // The phone accordion can close every step (active = -1). The desktop rail and
+  // panel, rendered but hidden on a phone, always show one step, so they read the
+  // nearest valid index: TIMELINE[-1] threw and took the whole page down.
+  const shown = Math.max(active, 0)
+  const step = TIMELINE[shown]
+  const pct = (shown / last) * 100
 
   const move = useCallback((delta) => {
-    setActive((i) => Math.min(Math.max(i + delta, 0), last))
+    setActive((i) => Math.min(Math.max(Math.max(i, 0) + delta, 0), last))
   }, [last])
 
   const onKeyDown = (e) => {
@@ -817,9 +840,9 @@ function Timeline() {
   }
 
   const dotClass = (i) =>
-    i === active
+    i === shown
       ? 'bg-brand-yellow scale-150 shadow-[0_0_0_4px_rgba(255,207,51,0.18),0_0_22px_rgba(255,207,51,0.85)]'
-      : i < active
+      : i < shown
         ? 'bg-brand-gold'
         : 'bg-brand-white/25 group-hover:bg-brand-yellow/70'
 
@@ -843,7 +866,7 @@ function Timeline() {
             <button
               key={s.w}
               role="tab"
-              aria-selected={i === active}
+              aria-selected={i === shown}
               onClick={() => setActive(i)}
               onMouseEnter={() => setActive(i)}
               className="group flex flex-col items-center gap-4 cursor-pointer"
@@ -852,7 +875,7 @@ function Timeline() {
               <span className={`w-[18px] h-[18px] rounded-full transition-all duration-300 ${dotClass(i)}`} />
               <span
                 className={`text-[10px] font-bold uppercase tracking-[0.18em] whitespace-nowrap transition-colors duration-300 ${
-                  i === active ? 'text-brand-yellow' : 'text-brand-gray group-hover:text-brand-white'
+                  i === shown ? 'text-brand-yellow' : 'text-brand-gray group-hover:text-brand-white'
                 }`}
               >
                 {s.w}
@@ -863,17 +886,17 @@ function Timeline() {
       </div>
 
       {/* Detail panel — desktop */}
-      <div key={active} className="hidden md:grid lg:grid-cols-12 gap-10 glass rounded-3xl p-10 min-h-[19rem] fade-up">
+      <div key={shown} className="hidden md:grid lg:grid-cols-12 gap-10 glass rounded-3xl p-10 min-h-[19rem] fade-up">
         <div className="lg:col-span-5 flex flex-col">
           <p className="text-[11px] font-bold uppercase tracking-[0.35em] text-brand-yellow mb-3">{step.w}</p>
-          <h3 className="text-3xl xl:text-4xl font-bold uppercase leading-[1.05] tracking-tight mb-4">{step.t}</h3>
+          <h3 className="text-3xl xl:text-4xl font-bold uppercase leading-[1.05] tracking-tight mb-4">{brandCase(step.t)}</h3>
           <p className="text-brand-gray leading-relaxed">{step.b}</p>
 
           <div className="flex items-center gap-4 mt-auto pt-8">
             <div className="flex gap-2">
               <button
                 onClick={() => move(-1)}
-                disabled={active === 0}
+                disabled={shown === 0}
                 aria-label="Previous step"
                 className="w-11 h-11 rounded-full border border-brand-white/15 flex items-center justify-center hover:border-brand-yellow hover:text-brand-yellow transition-colors disabled:opacity-25 disabled:hover:border-brand-white/15 disabled:hover:text-brand-white"
               >
@@ -889,7 +912,7 @@ function Timeline() {
               </button>
             </div>
             <span className="text-[11px] uppercase tracking-[0.25em] text-brand-gray">
-              Step {active + 1} of {TIMELINE.length}
+              Step {shown + 1} of {TIMELINE.length}
             </span>
           </div>
         </div>
@@ -931,7 +954,7 @@ function Timeline() {
                 }`}
               >
                 <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-brand-yellow mb-1.5">{s.w}</p>
-                <p className="font-bold uppercase leading-tight">{s.t}</p>
+                <p className="font-bold uppercase leading-tight">{brandCase(s.t)}</p>
                 {i === active && (
                   <div className="mt-4 space-y-4 fade-up">
                     <p className="text-brand-gray text-sm leading-relaxed">{s.b}</p>
@@ -1040,10 +1063,10 @@ function BriefBuilder({ brief, setBrief }) {
                 step={fmt.max - fmt.min > 60 ? 10 : 5}
                 value={brief.guests}
                 onChange={(e) => setBrief((b) => ({ ...b, guests: Number(e.target.value) }))}
-                className="w-full accent-[#ffcf33]"
+                className="w-full h-10 cursor-pointer accent-[#ffcf33]"
                 aria-label="Approximate guest numbers"
               />
-              <div className="flex justify-between text-[10px] uppercase tracking-[0.2em] text-brand-gray mt-2.5">
+              <div className="flex justify-between text-[10px] uppercase tracking-[0.2em] text-brand-gray mt-1">
                 <span>{fmt.min}</span><span>{fmt.max}</span>
               </div>
               {SHOW_INVESTMENT && fmt.baseCost != null && (
@@ -1061,7 +1084,7 @@ function BriefBuilder({ brief, setBrief }) {
       </div>
 
       <div className="lg:col-span-2">
-        <div data-anim style={anim} className="glass-gold rounded-3xl p-7 lg:sticky lg:top-28">
+        <div data-anim style={anim} className="glass-gold rounded-3xl p-7 lg:sticky lg:top-[calc(var(--nav-h,70px)+1.5rem)]">
           <p className="text-[10px] uppercase tracking-[0.3em] text-brand-gray mb-6">Your outline brief</p>
 
           <dl className="space-y-4 mb-6">
@@ -1084,7 +1107,7 @@ function BriefBuilder({ brief, setBrief }) {
               <p className="text-[10px] uppercase tracking-[0.25em] text-brand-gray mb-2">
                 {fmt ? (fmt.fee != null ? `Fee, covering ${fmt.feeCovers} guests` : `Indicative at ${brief.guests} guests`) : 'Investment'}
               </p>
-              <p className="text-2xl font-bold gold-text leading-tight">
+              <p className={`text-2xl font-bold leading-tight ${fmt ? 'gold-text' : 'text-brand-gray/60'}`}>
                 {!fmt ? '—' : est == null ? 'Quoted on brief' : fmtBand(est, fmt)}
               </p>
               {fmt && overCount(fmt, brief.guests) > 0 && (
@@ -1129,6 +1152,223 @@ function BriefBuilder({ brief, setBrief }) {
   )
 }
 
+// ─── First-screen offer ───────────────────────────────────────────────────
+// Stuart, 23 Sep 2026: "it's hard to find products when i have to scroll right
+// down for them". The hero closes on what a host can book and what it costs, read
+// from FORMATS and SUMMITS like the sections it summarises: the format links to
+// #formats, each slot to its own calendar row (#slot-<id>). Wherever the fee shows,
+// feeScope puts the guests it covers and the room ceiling beside it; the off-calendar
+// slot carries its premium, as it does on the calendar. SHOW_INVESTMENT = false drops
+// the fee and keeps the rest.
+const SLOT_TONE = {
+  open: 'text-brand-yellow',
+  interest: 'text-brand-white/80',
+  tbc: 'text-brand-gray',
+  premium: 'text-brand-champagne',
+}
+
+function HeroOffer() {
+  const eyebrow = 'text-[10px] font-bold uppercase tracking-[0.3em] text-brand-yellow/90'
+  // link text only; each use sets its own display
+  const more = 'items-center gap-1.5 whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.2em] text-brand-white group-hover:text-brand-yellow transition-colors'
+  return (
+    <div
+      data-offer
+      className="mt-9 sm:mt-10 w-full text-left glass-gold rounded-[1.75rem] overflow-hidden shadow-[0_40px_90px_-40px_rgba(0,0,0,0.9)]"
+    >
+      <div className="grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        <div className="lg:border-r border-brand-yellow/15">
+          {FORMATS.map((f, i) => {
+            const Icon = f.icon
+            const entry = indicative(f, f.min)
+            return (
+              <a
+                key={f.id}
+                href="#formats"
+                className={`group block h-full p-6 sm:p-7 hover:bg-brand-yellow/[0.035] transition-colors ${i ? 'border-t border-brand-yellow/15' : ''}`}
+              >
+                <span className="flex items-center justify-between gap-4 mb-3.5">
+                  <span className={eyebrow}>What we build</span>
+                  <span className={`inline-flex ${more}`}>
+                    See the format <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+                  </span>
+                </span>
+                <span className="flex items-center gap-2.5">
+                  <Icon className="w-5 h-5 text-brand-yellow shrink-0" />
+                  <span className="text-xl sm:text-2xl font-bold uppercase tracking-tight leading-none">{f.name}</span>
+                </span>
+                <span className="block mt-2.5 text-[10px] font-bold uppercase tracking-[0.14em] leading-relaxed text-brand-gray">
+                  <span className="block sm:inline">{f.guests}</span>
+                  <span className="hidden sm:inline"> · </span>
+                  <span className="block sm:inline">{f.duration}</span>
+                </span>
+                {SHOW_INVESTMENT && (
+                  <span className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-2">
+                    <span className="text-4xl sm:text-[2.75rem] font-bold gold-text leading-none tabular-nums tracking-tight">
+                      {entry == null ? 'Quoted on brief' : fmtPrice(roundTo(entry, 1000))}
+                    </span>
+                    {entry != null && (
+                      // broken at its " · " so neither clause splits across lines
+                      <span className="text-xs leading-snug text-brand-white/75 pb-px">
+                        {feeScope(f).split(' · ').map((part, j, all) => (
+                          <span key={part} className="block">{part}{j < all.length - 1 ? ' ·' : ''}</span>
+                        ))}
+                      </span>
+                    )}
+                  </span>
+                )}
+              </a>
+            )
+          })}
+        </div>
+
+        <div className="p-6 sm:p-7 border-t lg:border-t-0 border-brand-yellow/15">
+          <div className="flex items-center justify-between gap-4 mb-2 sm:mb-3.5">
+            <p className={eyebrow}>The 2027 calendar</p>
+            <a href="#calendar" className={`group hidden sm:inline-flex min-h-10 -my-3 ${more}`}>
+              See the calendar <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+            </a>
+          </div>
+          {/* A list on a phone, calendar leaves from sm up. The off-calendar slot
+              states its premium in place of a status, as its calendar badge does. */}
+          <ul className="grid sm:grid-cols-5 sm:gap-2.5">
+            {SUMMITS.map((s) => (
+              <li key={s.id} className="border-t border-brand-white/8 first:border-t-0 sm:border-0">
+                <a
+                  href={`#slot-${s.id}`}
+                  className="group flex sm:flex-col items-center sm:items-stretch gap-3 sm:gap-2.5 h-full min-h-11 py-1.5 sm:p-2.5 sm:rounded-2xl sm:border sm:border-brand-white/8 sm:bg-brand-dark/40 sm:hover:border-brand-yellow/45 transition-colors"
+                >
+                  <span className="sm:hidden w-9 shrink-0 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">{s.month}</span>
+                  <span className="hidden sm:flex"><DateTile s={s} compact /></span>
+                  <span className="min-w-0 flex-1 flex sm:flex-col items-center sm:items-start justify-between gap-x-3 gap-y-1.5">
+                    <span className="text-[13px] sm:text-xs font-bold leading-tight group-hover:text-brand-yellow transition-colors">{s.name}</span>
+                    <span className={`sm:mt-auto text-[9px] font-bold uppercase tracking-[0.14em] leading-snug text-right sm:text-left tabular-nums ${SLOT_TONE[s.status]}`}>
+                      {s.premium > 0 ? `+${Math.round(s.premium * 100)}%` : STATUS_STYLE[s.status].label}
+                    </span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+          <a href="#calendar" className={`group flex sm:hidden justify-between min-h-11 border-t border-brand-white/8 ${more}`}>
+            See the calendar <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+          </a>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Site navigation ──────────────────────────────────────────────────────
+// The purchase path (the format, the calendar, the brief) sits in the bar as the
+// width allows; every section, and the brochure, sits in the menu, which is the
+// whole nav on a phone. The section in view is marked (aria-current). App measures
+// the bar into --nav-h, so anchored jumps land below it at every breakpoint.
+const BAR_SHOW = { md: 'hidden md:block', lg: 'hidden lg:block', xl: 'hidden xl:block' }
+
+function SiteNav({ navRef, links, activeId }) {
+  const [open, setOpen] = useState(false)
+  const btnRef = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e) => { if (e.key === 'Escape') { setOpen(false); btnRef.current?.focus() } }
+    const onDown = (e) => { if (!navRef.current?.contains(e.target)) setOpen(false) }
+    document.addEventListener('keydown', onKey)
+    document.addEventListener('pointerdown', onDown)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.removeEventListener('pointerdown', onDown)
+    }
+  }, [open, navRef])
+
+  return (
+    <nav ref={navRef} aria-label="Brochure sections" className="fixed top-0 left-0 w-full z-50 bg-brand-dark/85 backdrop-blur-xl border-b border-brand-white/8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3.5 sm:py-4 flex justify-between items-center gap-3">
+        <a href="#" className="flex items-center gap-3 shrink-0 min-h-10">
+          <img alt="NEXT.io" className="h-7 sm:h-8 object-contain" src={`${base}logos/next-io.png`} />
+          <span className="hidden sm:block md:hidden lg:block text-[10px] uppercase tracking-[0.3em] text-brand-gray border-l border-brand-white/20 pl-3 whitespace-nowrap">
+            External Projects
+          </span>
+        </a>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <ul className="hidden md:flex items-center">
+            {links.filter((l) => l.bar).map(({ label, id, bar }) => (
+              <li key={id} className={BAR_SHOW[bar]}>
+                <a
+                  href={`#${id}`}
+                  aria-current={activeId === id ? 'true' : undefined}
+                  className={`block px-3 xl:px-3.5 py-3 text-[11px] font-bold uppercase tracking-[0.2em] whitespace-nowrap transition-colors ${
+                    activeId === id ? 'text-brand-yellow' : 'text-brand-white hover:text-brand-yellow'
+                  }`}
+                >
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+          {/* Under 360px the logo, the pill and the menu cannot share a line, so the
+              pill becomes a round mail button there. */}
+          <a
+            href="mailto:sales@next.io?subject=NEXT.io External Projects 2027 - Event Enquiry"
+            aria-label="Contact Sales"
+            className="inline-flex items-center justify-center h-10 w-10 shrink-0 min-[360px]:w-auto min-[360px]:px-4 sm:px-7 rounded-full bg-brand-yellow text-brand-dark font-bold text-[11px] uppercase tracking-[0.14em] sm:tracking-[0.2em] hover:bg-brand-champagne transition-colors whitespace-nowrap"
+          >
+            <Mail className="w-4 h-4 min-[360px]:hidden" aria-hidden="true" />
+            <span className="hidden min-[360px]:inline">Contact Sales</span>
+          </a>
+          <button
+            ref={btnRef}
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            aria-controls="site-menu"
+            aria-label={open ? 'Close the section menu' : 'Open the section menu'}
+            className={`w-10 h-10 shrink-0 rounded-full border flex items-center justify-center transition-colors ${
+              open ? 'border-brand-yellow text-brand-yellow' : 'border-brand-white/15 text-brand-white hover:border-brand-yellow hover:text-brand-yellow'
+            }`}
+          >
+            {open ? <X className="w-4 h-4" aria-hidden="true" /> : <Menu className="w-4 h-4" aria-hidden="true" />}
+          </button>
+        </div>
+      </div>
+
+      <div
+        id="site-menu"
+        hidden={!open}
+        className="absolute inset-x-0 top-full md:left-auto md:right-8 md:top-[calc(100%+0.5rem)] md:w-80 bg-brand-ink border-b md:border border-brand-white/10 md:rounded-3xl shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)] overflow-hidden"
+      >
+        <ul className="py-2">
+          {links.map(({ label, id }) => (
+            <li key={id}>
+              <a
+                href={`#${id}`}
+                onClick={() => setOpen(false)}
+                aria-current={activeId === id ? 'true' : undefined}
+                className={`group flex items-center justify-between gap-4 min-h-12 px-6 text-xs font-bold uppercase tracking-[0.2em] transition-colors ${
+                  activeId === id ? 'text-brand-yellow bg-brand-yellow/[0.06]' : 'text-brand-white hover:text-brand-yellow hover:bg-brand-white/[0.03]'
+                }`}
+              >
+                {label}
+                <ArrowRight className="w-3.5 h-3.5 text-brand-gray group-hover:text-brand-yellow transition-colors" aria-hidden="true" />
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div className="border-t border-brand-white/10 p-4">
+          <button
+            type="button"
+            onClick={() => { setOpen(false); downloadBrochurePDF() }}
+            className="flex items-center justify-center gap-2 w-full min-h-12 rounded-full border border-brand-white/20 font-bold text-[11px] uppercase tracking-[0.2em] hover:border-brand-yellow hover:text-brand-yellow transition-colors"
+          >
+            <Download className="w-4 h-4" aria-hidden="true" /> Print the brochure
+          </button>
+        </div>
+      </div>
+    </nav>
+  )
+}
+
 // ─── App ──────────────────────────────────────────────────────────────────
 export default function App() {
   useScrollAnimation()
@@ -1141,39 +1381,98 @@ export default function App() {
     document.getElementById('brief')?.scrollIntoView({ behavior: 'smooth' })
   }, [])
 
+  // Page order. `bar` is the breakpoint from which a link also sits in the nav bar;
+  // the menu always lists all of them.
   const navLinks = useMemo(() => [
-    ['What It Is', 'what-it-is'], ['Calendar', 'calendar'], ['The Format', 'formats'],
-    ['The Room', 'the-room'], ['How It Works', 'how-it-works'], ['Brief', 'brief'],
+    { label: 'What It Is', id: 'what-it-is' },
+    { label: 'The Format', id: 'formats', bar: 'md' },
+    { label: 'Calendar', id: 'calendar', bar: 'lg' },
+    { label: 'The Room', id: 'the-room' },
+    { label: 'How It Works', id: 'how-it-works', bar: 'xl' },
+    { label: 'Build a Brief', id: 'brief', bar: 'md' },
   ], [])
+
+  // The fixed nav changes height by breakpoint; anchored jumps and the sticky brief
+  // summary read it from --nav-h rather than a hardcoded offset.
+  const navRef = useRef(null)
+  useEffect(() => {
+    const nav = navRef.current
+    if (!nav) return
+    const set = () => document.documentElement.style.setProperty('--nav-h', `${nav.offsetHeight}px`)
+    set()
+    const ro = new ResizeObserver(set)
+    ro.observe(nav)
+    return () => ro.disconnect()
+  }, [])
+
+  // A deep link (…/#formats) arrives before React has rendered its target, so the
+  // browser has nothing to scroll to. Jump once the page exists, then land again
+  // whenever the page height settles in the first seconds: Inter swaps in after the
+  // first paint and moves everything above the target by ~120px. A reader's own
+  // input (wheel, touch, key, pointer) ends it, so nobody is dragged back.
+  useEffect(() => {
+    const id = decodeURIComponent(window.location.hash.slice(1))
+    if (!id) return
+    let moved = false
+    const stop = () => { moved = true }
+    const input = ['wheel', 'touchstart', 'keydown', 'pointerdown']
+    input.forEach((e) => window.addEventListener(e, stop, { passive: true }))
+    const jump = () => {
+      const el = document.getElementById(id)
+      if (!el || moved) return
+      const html = document.documentElement
+      const prev = html.style.scrollBehavior
+      html.style.scrollBehavior = 'auto'
+      el.scrollIntoView({ block: 'start' })
+      html.style.scrollBehavior = prev
+    }
+    let raf = requestAnimationFrame(jump)
+    const settle = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(jump) }
+    const ro = new ResizeObserver(settle)
+    ro.observe(document.body)
+    document.fonts?.addEventListener?.('loadingdone', settle)
+    const release = () => {
+      ro.disconnect()
+      document.fonts?.removeEventListener?.('loadingdone', settle)
+      input.forEach((e) => window.removeEventListener(e, stop))
+    }
+    const timer = setTimeout(release, 3000)
+    return () => { cancelAnimationFrame(raf); clearTimeout(timer); release() }
+  }, [])
+
+  // The section under the nav is the current one, marked in the bar and the menu.
+  const [activeId, setActiveId] = useState(null)
+  useEffect(() => {
+    let raf = 0
+    const measure = () => {
+      const line = (navRef.current?.offsetHeight || 70) + 8
+      let cur = null
+      for (const { id } of navLinks) {
+        const r = document.getElementById(id)?.getBoundingClientRect()
+        if (r && r.top <= line && r.bottom > line) cur = id
+      }
+      setActiveId(cur)
+    }
+    const onScroll = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(measure) }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    measure()
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      cancelAnimationFrame(raf)
+    }
+  }, [navLinks])
 
   return (
     <div className="grain min-h-screen bg-brand-dark text-brand-white font-sans">
 
       {/* ── NAV ── */}
-      <nav className="fixed top-0 left-0 w-full z-50 bg-brand-dark/85 backdrop-blur-xl py-4 border-b border-brand-white/8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex justify-between items-center gap-3">
-          <a href="#" className="flex items-center gap-3 shrink-0">
-            <img alt="NEXT.io" className="h-7 sm:h-8 object-contain" src={`${base}logos/next-io.png`} />
-            <span className="hidden sm:block text-[10px] uppercase tracking-[0.3em] text-brand-gray border-l border-brand-white/20 pl-3">
-              External Projects
-            </span>
-          </a>
-          <div className="flex items-center gap-7">
-            <a href="#formats" className="text-[11px] font-bold uppercase tracking-[0.2em] hover:text-brand-yellow transition-colors hidden md:block">The Format</a>
-            <a href="#brief" className="text-[11px] font-bold uppercase tracking-[0.2em] hover:text-brand-yellow transition-colors hidden md:block">Build a Brief</a>
-            <a
-              href="mailto:sales@next.io?subject=NEXT.io External Projects 2027 - Event Enquiry"
-              className="bg-brand-yellow text-brand-dark px-5 sm:px-7 py-2.5 rounded-full font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-brand-champagne transition-colors whitespace-nowrap"
-            >
-              Contact Sales
-            </a>
-          </div>
-        </div>
-      </nav>
+      <SiteNav navRef={navRef} links={navLinks} activeId={activeId} />
 
       <main>
         {/* ── HERO ── */}
-        <section className="relative min-h-[92vh] flex flex-col items-center justify-center overflow-hidden pt-28 pb-20">
+        <section className="relative min-h-[92vh] flex flex-col items-center justify-center overflow-hidden pt-24 sm:pt-28 lg:pt-[6.5rem] pb-16 sm:pb-20">
           <div className="absolute inset-0 z-0">
             <img alt="A NEXT.io partner-hosted CxO dinner" src={`${base}images/cxo-event-hero.jpg`} className="w-full h-full object-cover opacity-[0.28]" />
             <div className="absolute inset-0 vignette" />
@@ -1181,51 +1480,45 @@ export default function App() {
           </div>
           <div className="spill w-[38rem] h-[38rem] -top-40 left-1/2 -translate-x-1/2 opacity-70 shimmer" />
 
-          <div className="z-10 text-center max-w-5xl px-6 sm:px-8 w-full">
-            <div className="flex items-center justify-center gap-3 sm:gap-4 mb-8">
+          <div className="z-10 text-center max-w-6xl px-6 sm:px-8 w-full">
+            <div className="flex items-center justify-center gap-3 sm:gap-4 mb-6">
               <span className="gold-rule w-8 sm:w-12 rotate-180 shrink-0" />
               <p className="text-brand-yellow/90 font-bold uppercase tracking-[0.3em] sm:tracking-[0.45em] text-[10px] sm:text-xs whitespace-nowrap">External Projects · 2027</p>
               <span className="gold-rule w-8 sm:w-12 shrink-0" />
             </div>
-            <h1 className="text-5xl sm:text-7xl lg:text-[7.5rem] font-bold tracking-[-0.04em] uppercase leading-[0.86] mb-8">
+            <h1 className="text-5xl sm:text-7xl lg:text-[6.5rem] font-bold tracking-[-0.04em] uppercase leading-[0.86] mb-6">
               Your Event.<br /><span className="gold-text">Our Room.</span>
             </h1>
-            <p className="text-brand-white/75 text-base sm:text-xl max-w-3xl mx-auto leading-relaxed mb-10">
+            <p className="text-brand-white/75 text-base sm:text-xl max-w-3xl mx-auto leading-relaxed">
               Partner-funded VIP events, built and run by NEXT.io alongside the summits your buyers already attend —
               or wrapped around a date and a city of your own. It carries your brand alone. We find the venue, build
               it, fill the room from our network, run it on the night, and tell you honestly who was there.
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-2.5 mb-12 text-[10px] sm:text-[11px] uppercase tracking-[0.2em] font-bold">
+
+            <HeroOffer />
+
+            <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+              <a href="#brief" className="w-full sm:w-auto justify-center bg-brand-yellow text-brand-dark px-9 py-4 rounded-full font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-brand-champagne transition-colors flex items-center gap-2 shadow-[0_18px_50px_-18px_rgba(255,207,51,0.8)]">
+                Build your brief <ArrowRight className="w-4 h-4" />
+              </a>
+              <button onClick={downloadBrochurePDF} className="w-full sm:w-auto justify-center border border-brand-white/20 px-9 py-4 rounded-full font-bold text-[11px] uppercase tracking-[0.2em] hover:border-brand-yellow hover:text-brand-yellow transition-colors flex items-center gap-2">
+                <Download className="w-4 h-4" /> Print the brochure
+              </button>
+            </div>
+            {/* One row of pills from sm up; a 2 x 2 of tiles on a phone, where four
+                pills otherwise stack into a column. */}
+            <ul className="mt-8 grid grid-cols-2 sm:flex sm:flex-wrap sm:justify-center gap-2 sm:gap-2.5 text-[10px] sm:text-[11px] uppercase tracking-[0.12em] sm:tracking-[0.2em] font-bold">
               {[
                 [CalendarDays, 'Five slots in 2027'],
                 [Crown, 'One host per event'],
                 [Users, `Up to ${MAX_GUESTS} curated guests`],
                 [BadgeCheck, '75% C-level target'],
               ].map(([Icon, label]) => (
-                <span key={label} className="flex items-center gap-2 glass rounded-full py-2.5 px-4 whitespace-nowrap">
-                  <Icon className="w-3.5 h-3.5 text-brand-yellow" />{label}
-                </span>
+                <li key={label} className="flex items-center gap-2 glass rounded-2xl sm:rounded-full py-2.5 px-3.5 sm:px-4 text-left leading-snug sm:whitespace-nowrap">
+                  <Icon className="w-3.5 h-3.5 text-brand-yellow shrink-0" />{label}
+                </li>
               ))}
-            </div>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
-              <a href="#brief" className="bg-brand-yellow text-brand-dark px-9 py-4 rounded-full font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-brand-champagne transition-colors flex items-center gap-2 shadow-[0_18px_50px_-18px_rgba(255,207,51,0.8)]">
-                Build your brief <ArrowRight className="w-4 h-4" />
-              </a>
-              <button onClick={downloadBrochurePDF} className="border border-brand-white/20 px-9 py-4 rounded-full font-bold text-[11px] uppercase tracking-[0.2em] hover:border-brand-yellow hover:text-brand-yellow transition-colors flex items-center gap-2">
-                <Download className="w-4 h-4" /> Print the brochure
-              </button>
-            </div>
-            <div className="flex flex-wrap justify-center gap-2.5">
-              {navLinks.map(([label, id]) => (
-                <a
-                  key={id}
-                  href={`#${id}`}
-                  className="text-brand-gray hover:text-brand-yellow font-bold uppercase tracking-[0.2em] text-[10px] transition-colors border border-brand-white/12 hover:border-brand-yellow/60 px-5 py-2.5 rounded-full"
-                >
-                  {label}
-                </a>
-              ))}
-            </div>
+            </ul>
           </div>
         </section>
 
@@ -1250,7 +1543,7 @@ export default function App() {
                 [Building2, 'We build and run it', 'Venue, food and drink, production, branding, staffing and on-site management. NEXT.io is the organiser of record and carries the operational risk.'],
                 [Users, 'We fill the room', 'The guest list comes out of the NEXT.io network and is built against your written brief — then invited, chased and managed on the door.'],
               ].map(([Icon, t, b], i) => (
-                <div key={t} data-anim style={{ ...anim, transitionDelay: `${i * 90}ms` }} className="glass lift rounded-3xl p-9 hover:border-brand-yellow/45">
+                <div key={t} data-anim style={{ ...anim, transitionDelay: `${i * 90}ms` }} className="glass lift rounded-3xl p-7 sm:p-9 hover:border-brand-yellow/45">
                   <div className="w-12 h-12 rounded-full bg-brand-yellow/12 border border-brand-yellow/25 flex items-center justify-center mb-6">
                     <Icon className="w-5 h-5 text-brand-yellow" />
                   </div>
@@ -1267,9 +1560,9 @@ export default function App() {
                 ['5', 'Host cities across Europe and the US'],
                 ['75%', 'Target C-level and head-of'],
               ].map(([n, l], i) => (
-                <div key={l} data-anim style={{ ...anim, transitionDelay: `${i * 80}ms` }} className="glass lift text-center px-4 py-9 rounded-3xl hover:border-brand-yellow/45">
+                <div key={l} data-anim style={{ ...anim, transitionDelay: `${i * 80}ms` }} className="glass lift px-5 sm:px-6 py-8 sm:py-9 rounded-3xl hover:border-brand-yellow/45">
                   <p className="text-5xl md:text-6xl font-bold gold-text mb-3 leading-none tracking-tight">{n}</p>
-                  <p className="text-brand-gray text-[10px] md:text-[11px] uppercase tracking-[0.2em] leading-snug">{l}</p>
+                  <p className="text-brand-gray text-[10px] md:text-[11px] uppercase tracking-[0.14em] sm:tracking-[0.2em] leading-snug">{l}</p>
                 </div>
               ))}
             </div>
@@ -1283,8 +1576,35 @@ export default function App() {
           </div>
         </section>
 
+        {/* ── FORMATS ── */}
+        <section id="formats" className="relative py-28 bg-brand-ink/70 border-t border-brand-white/8 overflow-hidden">
+          <div className="spill w-[34rem] h-[34rem] -left-48 top-1/4 opacity-45" />
+          <div className="relative max-w-7xl mx-auto px-6 sm:px-8">
+            <div data-anim style={anim} className="max-w-3xl mb-14">
+              <Eyebrow>What we build</Eyebrow>
+              <h2 className="text-4xl md:text-6xl font-bold uppercase tracking-tight leading-[1.02] mb-5">
+                A proven format,<br /><span className="gold-text">not a blank page.</span>
+              </h2>
+              <p className="text-brand-gray text-lg leading-relaxed">
+                We have built and run this many times over, which is why we can tell you exactly what it includes,
+                what it does not, and how much notice it needs before you have signed anything.
+                {SHOW_INVESTMENT && ' The fee is fixed for the format as specified — no surprises once the brief is agreed.'}
+              </p>
+            </div>
+            {FORMATS.length === 1 ? (
+              <FormatFeature f={FORMATS[0]} selected={brief.format === FORMATS[0].id} onSelect={selectFormat} />
+            ) : (
+              <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {FORMATS.map((f, i) => (
+                  <FormatCard key={f.id} f={f} delay={i * 60} selected={brief.format === f.id} onSelect={selectFormat} />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
         {/* ── CALENDAR ── */}
-        <section id="calendar" className="relative py-28 bg-brand-ink/70 border-t border-brand-white/8 overflow-hidden">
+        <section id="calendar" className="relative py-28 border-t border-brand-white/8 overflow-hidden">
           <div className="spill w-[32rem] h-[32rem] -right-40 top-1/3 opacity-50" />
           <div className="relative max-w-7xl mx-auto px-6 sm:px-8">
             <div data-anim style={anim} className="max-w-3xl mb-14">
@@ -1307,7 +1627,7 @@ export default function App() {
                 const chosen = brief.summit === s.id
                 const isPremium = s.premium > 0
                 return (
-                  <li key={s.id}>
+                  <li key={s.id} id={`slot-${s.id}`} className="jump-target">
                     <button
                       onClick={() => { setBrief((b) => ({ ...b, summit: s.id })); document.getElementById('brief')?.scrollIntoView({ behavior: 'smooth' }) }}
                       data-anim
@@ -1339,7 +1659,7 @@ export default function App() {
                         {s.note}
                       </span>
 
-                      <span className="col-span-2 row-start-3 md:col-span-1 md:col-start-3 md:row-start-1 md:row-span-2 xl:col-start-4 xl:row-span-1 flex md:flex-col items-center md:items-end justify-between gap-3 pt-4 md:pt-0 border-t border-brand-white/8 md:border-0">
+                      <span className="col-span-2 row-start-3 md:col-span-1 md:col-start-3 md:row-start-1 md:row-span-2 xl:col-start-4 xl:row-span-1 flex flex-wrap md:flex-nowrap md:flex-col items-center md:items-end justify-between gap-x-3 gap-y-2.5 pt-4 md:pt-0 border-t border-brand-white/8 md:border-0">
                         <span className={`inline-flex items-center whitespace-nowrap text-[9px] font-bold uppercase tracking-[0.2em] rounded-full px-3.5 py-2 ${st.cls}`}>
                           {st.label}
                         </span>
@@ -1366,33 +1686,6 @@ export default function App() {
           </div>
         </section>
 
-        {/* ── FORMATS ── */}
-        <section id="formats" className="relative py-28 border-t border-brand-white/8 overflow-hidden">
-          <div className="spill w-[34rem] h-[34rem] -left-48 top-1/4 opacity-45" />
-          <div className="relative max-w-7xl mx-auto px-6 sm:px-8">
-            <div data-anim style={anim} className="max-w-3xl mb-14">
-              <Eyebrow>What we build</Eyebrow>
-              <h2 className="text-4xl md:text-6xl font-bold uppercase tracking-tight leading-[1.02] mb-5">
-                A proven format,<br /><span className="gold-text">not a blank page.</span>
-              </h2>
-              <p className="text-brand-gray text-lg leading-relaxed">
-                We have built and run this many times over, which is why we can tell you exactly what it includes,
-                what it does not, and how much notice it needs before you have signed anything.
-                {SHOW_INVESTMENT && ' The fee is fixed for the format as specified — no surprises once the brief is agreed.'}
-              </p>
-            </div>
-            {FORMATS.length === 1 ? (
-              <FormatFeature f={FORMATS[0]} selected={brief.format === FORMATS[0].id} onSelect={selectFormat} />
-            ) : (
-              <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {FORMATS.map((f, i) => (
-                  <FormatCard key={f.id} f={f} delay={i * 60} selected={brief.format === f.id} onSelect={selectFormat} />
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-
         {/* ── THE ROOM ── */}
         <section id="the-room" className="relative py-28 bg-brand-ink/70 border-t border-brand-white/8 overflow-hidden">
           <div className="spill w-[30rem] h-[30rem] right-0 bottom-20 opacity-45" />
@@ -1415,9 +1708,9 @@ export default function App() {
                 ['80%', 'Of your written guest criteria'],
                 ['1', 'Host per event — always'],
               ].map(([n, l], i) => (
-                <div key={l} data-anim style={{ ...anim, transitionDelay: `${i * 80}ms` }} className="glass lift px-6 py-9 rounded-3xl hover:border-brand-yellow/45">
-                  <p className="text-5xl font-bold gold-text mb-3 leading-none tracking-tight">{n}</p>
-                  <p className="text-brand-gray text-[10px] uppercase tracking-[0.2em] leading-snug">{l}</p>
+                <div key={l} data-anim style={{ ...anim, transitionDelay: `${i * 80}ms` }} className="glass lift px-5 sm:px-6 py-8 sm:py-9 rounded-3xl hover:border-brand-yellow/45">
+                  <p className="text-5xl md:text-6xl font-bold gold-text mb-3 leading-none tracking-tight">{n}</p>
+                  <p className="text-brand-gray text-[10px] md:text-[11px] uppercase tracking-[0.14em] sm:tracking-[0.2em] leading-snug">{l}</p>
                 </div>
               ))}
             </div>
@@ -1431,7 +1724,7 @@ export default function App() {
                       <span className="w-9 h-9 rounded-full bg-brand-yellow text-brand-dark font-bold text-sm flex items-center justify-center shrink-0">{i + 1}</span>
                       <Icon className="w-5 h-5 text-brand-yellow" />
                     </div>
-                    <h3 className="font-bold uppercase text-lg mb-2.5 leading-tight tracking-tight">{s.title}</h3>
+                    <h3 className="font-bold uppercase text-lg mb-2.5 leading-tight tracking-tight">{brandCase(s.title)}</h3>
                     <p className="text-brand-gray text-sm leading-relaxed">{s.body}</p>
                   </div>
                 )
@@ -1439,7 +1732,7 @@ export default function App() {
             </div>
 
             <div className="grid md:grid-cols-2 gap-5">
-              <div data-anim style={anim} className="glass rounded-3xl p-9">
+              <div data-anim style={anim} className="glass rounded-3xl p-7 sm:p-9">
                 <div className="flex items-center gap-3 mb-6">
                   <Eye className="w-5 h-5 text-brand-yellow" />
                   <h3 className="text-xl font-bold uppercase tracking-tight">What your report covers</h3>
@@ -1452,7 +1745,7 @@ export default function App() {
                   ))}
                 </ul>
               </div>
-              <div data-anim style={{ ...anim, transitionDelay: '90ms' }} className="glass-gold rounded-3xl p-9">
+              <div data-anim style={{ ...anim, transitionDelay: '90ms' }} className="glass-gold rounded-3xl p-7 sm:p-9">
                 <div className="flex items-center gap-3 mb-6">
                   <Target className="w-5 h-5 text-brand-yellow" />
                   <h3 className="text-xl font-bold uppercase tracking-tight">What it does not cover</h3>
@@ -1522,7 +1815,7 @@ export default function App() {
                   return (
                     <div key={t.t} data-anim style={{ ...anim, transitionDelay: `${(i % 3) * 80}ms` }} className="glass lift rounded-3xl p-8 hover:border-brand-yellow/45">
                       <Icon className="w-5 h-5 text-brand-yellow mb-5" />
-                      <h4 className="text-lg font-bold uppercase mb-2.5 leading-tight tracking-tight">{t.t}</h4>
+                      <h4 className="text-lg font-bold uppercase mb-2.5 leading-tight tracking-tight">{brandCase(t.t)}</h4>
                       <p className="text-brand-gray text-sm leading-relaxed">{t.b}</p>
                     </div>
                   )
@@ -1533,7 +1826,9 @@ export default function App() {
         </section>
 
         {/* ── BRIEF BUILDER ── */}
-        <section id="brief" className="relative py-28 bg-brand-ink/70 border-t border-brand-white/8 overflow-hidden">
+        {/* overflow-clip, not overflow-hidden: a hidden section is a scroll
+            container, which pinned the sticky brief summary to it (it never stuck). */}
+        <section id="brief" className="relative py-28 bg-brand-ink/70 border-t border-brand-white/8 overflow-clip">
           <div className="spill w-[32rem] h-[32rem] -right-32 top-10 opacity-50" />
           <div className="relative max-w-7xl mx-auto px-6 sm:px-8">
             <div data-anim style={anim} className="max-w-3xl mb-14">
@@ -1551,16 +1846,18 @@ export default function App() {
         </section>
 
         {/* ── FAQ ── */}
+        {/* Heading on the page's left edge like every other section, with the
+            questions beside it from lg up (it used to sit in a centred column). */}
         <section className="relative py-28 border-t border-brand-white/8">
-          <div className="max-w-4xl mx-auto px-6 sm:px-8">
-            <div data-anim style={anim} className="mb-12">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 grid lg:grid-cols-12 gap-x-16">
+            <div data-anim style={anim} className="lg:col-span-4 mb-12 lg:mb-0">
               <Eyebrow>Before you ask</Eyebrow>
               <h2 className="text-4xl md:text-6xl font-bold uppercase tracking-tight leading-[1.02] mb-5">
                 Straight <span className="gold-text">answers.</span>
               </h2>
               <p className="text-brand-gray text-lg">The questions that come up in the first call, answered before it.</p>
             </div>
-            <div className="space-y-3">
+            <div className="lg:col-span-8 space-y-3">
               {FAQS.map((f, i) => (
                 <div key={f.q} data-anim style={{ ...anim, transitionDelay: `${i * 60}ms` }} className={`rounded-3xl overflow-hidden transition-colors ${openFaq === i ? 'glass-gold' : 'glass'}`}>
                   <button
@@ -1591,12 +1888,13 @@ export default function App() {
                 Tell us the occasion, the format and roughly how many people you want in the room. You will hear back
                 from a named person inside one working day.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href="#brief" className="bg-brand-yellow text-brand-dark px-9 py-4 rounded-full font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-brand-champagne transition-colors flex items-center gap-2 shadow-[0_18px_50px_-18px_rgba(255,207,51,0.8)]">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+                <a href="#brief" className="w-full sm:w-auto justify-center bg-brand-yellow text-brand-dark px-9 py-4 rounded-full font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-brand-champagne transition-colors flex items-center gap-2 shadow-[0_18px_50px_-18px_rgba(255,207,51,0.8)]">
                   Build your brief <ArrowRight className="w-4 h-4" />
                 </a>
-                <a href="mailto:sales@next.io?subject=NEXT.io External Projects 2027 - Event Enquiry" className="border border-brand-white/20 px-9 py-4 rounded-full font-bold text-[11px] uppercase tracking-[0.2em] hover:border-brand-yellow hover:text-brand-yellow transition-colors flex items-center gap-2">
-                  <Mail className="w-4 h-4" /> sales@next.io
+                {/* An address keeps its own case: set in capitals it read NEXT.IO. */}
+                <a href="mailto:sales@next.io?subject=NEXT.io External Projects 2027 - Event Enquiry" className="w-full sm:w-auto justify-center border border-brand-white/20 px-9 py-4 rounded-full font-bold text-[11px] uppercase tracking-[0.2em] hover:border-brand-yellow hover:text-brand-yellow transition-colors flex items-center gap-2">
+                  <Mail className="w-4 h-4" /> <span className="normal-case text-[13px] leading-none tracking-[0.03em]">sales@next.io</span>
                 </a>
               </div>
             </div>
@@ -1613,14 +1911,14 @@ export default function App() {
               External Projects 2027
             </span>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
-            <a href="mailto:sales@next.io" className="flex items-center gap-2 text-brand-gray hover:text-brand-yellow transition-colors">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-sm">
+            <a href="mailto:sales@next.io" className="flex items-center gap-2 min-h-10 text-brand-gray hover:text-brand-yellow transition-colors">
               <Mail className="w-4 h-4" /> sales@next.io
             </a>
-            <a href="https://next.io" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-brand-gray hover:text-brand-yellow transition-colors">
+            <a href="https://next.io" target="_blank" rel="noreferrer" className="flex items-center gap-2 min-h-10 text-brand-gray hover:text-brand-yellow transition-colors">
               <Globe className="w-4 h-4" /> next.io
             </a>
-            <button onClick={downloadBrochurePDF} className="flex items-center gap-2 text-brand-gray hover:text-brand-yellow transition-colors">
+            <button onClick={downloadBrochurePDF} className="flex items-center gap-2 min-h-10 text-brand-gray hover:text-brand-yellow transition-colors">
               <Download className="w-4 h-4" /> Print the brochure
             </button>
           </div>

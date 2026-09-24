@@ -27,6 +27,25 @@
     background: #ffcf33;
     color: #0b0b0d;
   }
+  /* Short uppercase headlines break evenly rather than leaving one word on the
+     last line (A ROOM OF YOUR / OWN.). */
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+  }
+  /* Chrome does not balance the lines after a <br>, so the gold second half of
+     each section headline is its own inline block and balances on its own. */
+  h2 > .gold-text {
+    display: inline-block;
+  }
+  /* Navigation: an anchored jump (the bar, the menu, the first-screen panel or a
+     deep link) lands below the fixed nav. App measures the nav into --nav-h,
+     because its height changes by breakpoint. */
+  section[id] {
+    scroll-margin-top: var(--nav-h, 70px);
+  }
+  .jump-target {
+    scroll-margin-top: calc(var(--nav-h, 70px) + 1rem);
+  }
 }
 
 @layer utilities {

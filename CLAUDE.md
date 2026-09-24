@@ -78,3 +78,27 @@ Confirm it prints `Published` before reporting done.
   colours.
 - Imagery is reused NEXT Summit Valletta 2025 photography of real partner-hosted events.
   Swap in per-format shots when Marketing supplies them.
+
+## Navigation (23 Sep 2026)
+
+Stuart: "it's hard to find products when i have to scroll right down for them".
+
+- **The first screen carries the offer.** `HeroOffer` (`[data-offer]`, under the hero
+  lede) shows the format, its fee with `feeScope` (the 60-guest scope and the room
+  ceiling, always together; the printed brochure reads the same helper) and the five
+  slots as calendar leaves, each linking to its own row (`#slot-<id>`); the off-calendar
+  leaf carries its premium. It reads `FORMATS` and `SUMMITS` only, and
+  `SHOW_INVESTMENT = false` drops the fee.
+- **Section order:** what it is → the format (`#formats`) → the calendar → the room →
+  how it works → brief. The format sits ahead of the calendar. Grounds alternate, so a
+  reorder swaps `bg-brand-ink/70` too.
+- **`SiteNav`:** the bar shows The Format and Build a Brief from md, Calendar from lg,
+  How It Works from xl; the menu button (every width) lists every section plus the
+  printable brochure, and is the whole nav on a phone. `navLinks` in App is the one list
+  (page order, plus the `bar` breakpoint). The section in view is marked `aria-current`.
+- **Anchors land by measurement:** App measures the nav into `--nav-h`
+  (ResizeObserver); `section[id]` and `.jump-target` use it as `scroll-margin-top`, and
+  the sticky brief summary as its `top`. Never hardcode a nav offset. First-load deep
+  links (`…/#formats`) are landed again after render and while Inter swaps in, until
+  the reader scrolls. `#brief` is `overflow-clip`, not `overflow-hidden`: a hidden
+  section is a scroll container, and the sticky summary never stuck.
