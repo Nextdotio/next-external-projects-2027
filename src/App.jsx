@@ -1915,8 +1915,9 @@ function FormatsSlide({ goId }) {
 function FormatSlide({ f, inBrief, onAdd, landOn }) {
   const Icon = f.icon
   const id = formatSlideId(f)
-  const shown = f.included.slice(0, 6)
-  const more = f.included.length - shown.length
+  // every line the fee covers, always (Stuart, 26 Sep 2026: "Please do include
+  // all deliverables. It's important")
+  const shown = f.included
   return (
     <div className="grid lg:grid-cols-12 gap-x-12 gap-y-8 items-start">
       <div className="lg:col-span-7">
@@ -1959,11 +1960,6 @@ function FormatSlide({ f, inBrief, onAdd, landOn }) {
               </li>
             ))}
           </ul>
-          {more > 0 && (
-            <button type="button" onClick={() => landOn(id)} className="mt-3 -mb-1 inline-flex items-center min-h-11 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow hover:text-brand-champagne transition-colors">
-              + {more} more on the card
-            </button>
-          )}
         </div>
         <div className="rounded-2xl bg-brand-dark/60 border border-brand-white/8 p-5">
           <p className="text-[10px] uppercase tracking-[0.25em] text-brand-gray mb-3">Not included</p>

@@ -149,7 +149,9 @@ every product."
   the slide list first and then the deck; swipe on touch. Focus returns to whatever
   opened the deck; the page behind is inert and scroll-locked; reduced motion drops
   the slide animation.
-- **Fit:** a typical slide fits 1280x800 without scrolling. The `short` variant in
+- **Fit:** a typical slide fits 1280x800 without scrolling. The format slide lists
+  every line the fee covers, never "+ N more on the card" (Stuart, 26 Sep 2026:
+  "Please do include all deliverables. It's important"). The `short` variant in
   `src/index.css` (max-height 820px) tightens the deck's spacing and type for that; a
   long slide may scroll on a phone, and nothing scrolls sideways at 390. Check both
   before adding content to a slide.
