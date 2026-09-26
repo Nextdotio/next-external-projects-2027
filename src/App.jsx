@@ -68,7 +68,7 @@ const SUMMITS = [
     month: 'JAN',
     status: 'open',
     premium: 0,
-    note: 'The year opens here. Anything at ICE is sold and built during 2026 — briefs want to be with us by October.',
+    note: 'The year opens here. Anything at ICE is sold and built during 2026, so briefs want to be with us by October.',
   },
   {
     id: 'igb',
@@ -108,7 +108,7 @@ const SUMMITS = [
     month: 'ANY',
     status: 'premium',
     premium: 0.3,
-    note: 'Already have a date, a city or an occasion of your own? We wrap the whole operation around it. Away from a summit week nothing is shared — crew, freight, venue and guest travel are all built from scratch — so it carries a premium.',
+    note: 'Already have a date, a city or an occasion of your own? We wrap the whole operation around it. Away from a summit week nothing is shared (crew, freight, venue and guest travel are all built from scratch), so it carries a premium.',
   },
 ]
 
@@ -142,7 +142,7 @@ const FORMATS = [
     included: [
       'Private venue within walking distance of the summit, held exclusively for you',
       'Three to four hours of bar and canapé service',
-      'Your branding across the space — entrance, bar, backdrop, screens',
+      'Your branding across the space: entrance, bar, backdrop, screens',
       'Guest list built from the NEXT.io network against your written brief',
       'Branded invitations, a hosted event page and live RSVP tracking',
       'WhatsApp invite journey with reminders at two weeks, one week and on the day',
@@ -260,7 +260,7 @@ const RESPONSE = [
   { d: '1', t: 'First response', b: 'A named person replies, with the questions we need answered.' },
   { d: '2', t: 'A budget figure', b: 'A number you can take into a meeting, before anything has been scoped or booked.' },
   { d: '3', t: 'Can we deliver it', b: 'A straight yes or no on the format, the city and the date. We would rather say no early.' },
-  { d: '5', t: 'Full proposal', b: 'Venues, scope, costs and timeline — once we have everything we asked for.' },
+  { d: '5', t: 'Full proposal', b: 'Venues, scope, costs and timeline, once we have everything we asked for.' },
 ]
 
 const TERMS = [
@@ -279,7 +279,7 @@ const FAQS = [
   },
   {
     q: 'Why does an off-calendar event cost more?',
-    a: 'During a summit week the industry is already in one city, so crew, freight and venue costs are shared across several events and your guests are a taxi ride away. Take the same event to your own city on your own date and none of that is shared — the crew flies in for you alone, and the guest list has to be flown in rather than intercepted. That is what the premium pays for.',
+    a: 'During a summit week the industry is already in one city, so crew, freight and venue costs are shared across several events and your guests are a taxi ride away. Take the same event to your own city on your own date and none of that is shared: the crew flies in for you alone, and the guest list has to be flown in rather than intercepted. That is what the premium pays for.',
   },
   {
     q: 'Can we bring our own guest list?',
@@ -291,7 +291,7 @@ const FAQS = [
   },
   {
     q: 'What if fewer people turn up than we agreed?',
-    a: 'You get the real numbers. The post-event report shows registered against attended and the seniority mix you actually got. If we missed the brief, the report says so — that is the point of measuring it.',
+    a: 'You get the real numbers. The post-event report shows registered against attended and the seniority mix you actually got. If we missed the brief, the report says so. That is the point of measuring it.',
   },
   {
     q: 'How quickly can you turn one around?',
@@ -308,37 +308,37 @@ const HEADS = {
   hero: {
     eyebrow: 'External Projects · 2027',
     title: 'Your Event.', gold: 'Our Room.',
-    lede: 'Partner-funded VIP events, built and run by NEXT.io alongside the summits your buyers already attend — or wrapped around a date and a city of your own. It carries your brand alone. We find the venue, build it, fill the room from our network, run it on the night, and tell you honestly who was there.',
+    lede: 'Partner-funded VIP events, built and run by NEXT.io alongside the summits your buyers already attend, or wrapped around a date and a city of your own. It carries your brand alone. We find the venue, build it, fill the room from our network, run it on the night, and tell you honestly who was there.',
   },
   whatItIs: {
     eyebrow: 'What this actually is',
     title: 'Not a sponsorship.', gold: 'A room of your own.',
-    lede: 'No logo on someone else’s banner. An event of your own, in a city where the industry has already booked its flights — run end to end by the team that runs the NEXT.io summits.',
+    lede: 'No logo on someone else’s banner. An event of your own, in a city where the industry has already booked its flights, run end to end by the team that runs the NEXT.io summits.',
   },
   formats: {
     eyebrow: 'What we build',
     title: 'A proven format,', gold: 'not a blank page.',
     lede: [
       'We have built and run this many times over, which is why we can tell you exactly what it includes, what it does not, and how much notice it needs before you have signed anything.',
-      SHOW_INVESTMENT && 'The fee is fixed for the format as specified — no surprises once the brief is agreed.',
+      SHOW_INVESTMENT && 'The fee is fixed for the format as specified, so there are no surprises once the brief is agreed.',
     ],
   },
   calendar: {
     eyebrow: 'The 2027 calendar',
     title: 'Five slots.', gold: 'Three of them dated.',
-    lede: 'Planned against the summits rather than invented on request. Pick the week your buyers are already travelling to — or take the fifth option and we build it around a date of your own.',
+    lede: 'Planned against the summits rather than invented on request. Pick the week your buyers are already travelling to, or take the fifth option and we build it around a date of your own.',
   },
   room: {
     eyebrow: 'The guest list',
     title: 'The room', gold: 'is the product.',
-    lede: 'Any agency can find you a venue. The reason to do this with NEXT.io is the guest list — and the fact that we will tell you afterwards how close we got to the one you asked for.',
+    lede: 'Any agency can find you a venue. The reason to do this with NEXT.io is the guest list, and the fact that we will tell you afterwards how close we got to the one you asked for.',
   },
   build: {
     eyebrow: 'The build',
     title: 'Brief to event', gold: 'in twelve weeks.',
     lede: [
       'Twelve weeks is the standard build for a first event; eight is usually enough if you have hosted with us before.',
-      'Walk the track — every step says what we do and what we need from you.',
+      'Walk the track: every step says what we do and what we need from you.',
     ],
   },
   response: {
@@ -352,7 +352,7 @@ const HEADS = {
   brief: {
     eyebrow: 'Start here',
     title: 'Build', gold: 'your brief.',
-    lede: 'Three choices and you have something to send us. It is not a booking — it is the first two emails, already written.',
+    lede: 'Three choices and you have something to send us. It is not a booking. It is the first two emails, already written.',
   },
   faq: {
     eyebrow: 'Before you ask',
@@ -368,9 +368,9 @@ const ledeText = (lede) => [].concat(lede).filter(Boolean).join(' ')
 
 // You host / we build and run / we fill the room.
 const PILLARS = [
-  { icon: Crown, t: 'You host it', b: 'It is your event, your brand and your guests. One host per event — no co-sponsors, no shared billing and no competitor standing in the same room.' },
+  { icon: Crown, t: 'You host it', b: 'It is your event, your brand and your guests. One host per event: no co-sponsors, no shared billing and no competitor standing in the same room.' },
   { icon: Building2, t: 'We build and run it', b: 'Venue, food and drink, production, branding, staffing and on-site management. NEXT.io is the organiser of record and carries the operational risk.' },
-  { icon: Users, t: 'We fill the room', b: 'The guest list comes out of the NEXT.io network and is built against your written brief — then invited, chased and managed on the door.' },
+  { icon: Users, t: 'We fill the room', b: 'The guest list comes out of the NEXT.io network and is built against your written brief, then invited, chased and managed on the door.' },
 ]
 
 // Track record. The 800+ is the founders' lifetime output since Events by Martin;
@@ -394,14 +394,14 @@ const ROOM_STATS = [
   [String(MAX_GUESTS), 'Guests at the largest room we build'],
   ['75%', 'Target C-level and head-of'],
   ['80%', 'Of your written guest criteria'],
-  ['1', 'Host per event — always'],
+  ['1', 'Host per event, always'],
 ]
 
 // The report: what it covers is REPORT_IN; what it does not is this.
 const PIPELINE = {
   title: 'What it does not cover',
   big: 'Your pipeline.',
-  body: 'We can tell you exactly who walked in, how senior they were, who they met and what they thought of the evening. What that becomes commercially is yours to run — and we would rather say that now than dress an attendance number up as revenue in three months’ time.',
+  body: 'We can tell you exactly who walked in, how senior they were, who they met and what they thought of the evening. What that becomes commercially is yours to run, and we would rather say that now than dress an attendance number up as revenue in three months’ time.',
 }
 const REPORT_TITLE = 'What your report covers'
 
@@ -410,7 +410,7 @@ const REPORT_TITLE = 'What your report covers'
 // that applies to it.
 const CALENDAR_NOTES = [
   'Summit dates are as published by the organisers and are confirmed with them before anything is booked.',
-  'Off-calendar builds are priced at a premium because outside a summit week nothing is shared — crew and freight travel for you alone, and the room has to be brought to the city rather than found in it.',
+  'Off-calendar builds are priced at a premium because outside a summit week nothing is shared: crew and freight travel for you alone, and the room has to be brought to the city rather than found in it.',
 ]
 
 // ─── Enquiry mailto ───────────────────────────────────────────────────────
@@ -531,15 +531,15 @@ function downloadBriefPDF(brief) {
   <div class="body">
     <div class="label">The event</div>
     <table>
-      ${row('Occasion', smt ? (smt.id === 'offcal' ? 'Off-calendar — your own city and date' : `${smt.name} — ${smt.city}`) : 'To be discussed')}
+      ${row('Occasion', smt ? (smt.id === 'offcal' ? 'Off-calendar: your own city and date' : `${smt.name} · ${smt.city}`) : 'To be discussed')}
       ${row('Dates', smt ? smt.dates : 'To be discussed')}
       ${row('Format', fmt ? fmt.name : 'To be discussed')}
       ${row('Guest numbers', fmt ? `approx. ${brief.guests} · the room runs ${fmt.min} to ${fmt.max}` : 'To be discussed')}
       ${row('Minimum lead time', fmt ? fmt.notice : '8–16 weeks depending on format')}
-      ${SHOW_INVESTMENT ? row(fmt && fmt.fee != null ? `Fee, covering ${fmt.feeCovers} guests` : `Indicative at ${fmt ? brief.guests : '—'} guests`, est ? fmtBand(est, fmt) : 'Quoted on brief') : ''}
+      ${SHOW_INVESTMENT ? row(fmt && fmt.fee != null ? `Fee, covering ${fmt.feeCovers} guests` : fmt ? `Indicative at ${brief.guests} guests` : 'Investment', est ? fmtBand(est, fmt) : 'Quoted on brief') : ''}
       ${SHOW_INVESTMENT && fmt && overCount(fmt, brief.guests) ? row('Guests beyond the fee', `${overCount(fmt, brief.guests)} - catering quoted on the brief`) : ''}
-      ${SHOW_INVESTMENT && premium ? row('Off-calendar premium', `Included — +${Math.round(premium * 100)}% for a build outside a summit week`) : ''}
-      ${row('Exclusivity', 'One host per event — no co-sponsors')}
+      ${SHOW_INVESTMENT && premium ? row('Off-calendar premium', `Included: +${Math.round(premium * 100)}% for a build outside a summit week`) : ''}
+      ${row('Exclusivity', 'One host per event, no co-sponsors')}
     </table>
     ${fmt ? `
     <div class="label">What is included</div>
@@ -642,10 +642,10 @@ function downloadBrochurePDF() {
   <div class="cover">
     <h1>NEXT<span class="io">.io</span> External Projects <span>2027</span></h1>
     <div class="tag">Your event. Our room.</div>
-    <p>Partner-funded VIP events, built and run by NEXT.io alongside the summits your buyers already attend — or wrapped around a date and a city of your own. You host it and it carries your brand alone. We find the venue, build it, fill the room from our network, run it on the night and report on who was actually there.</p>
+    <p>Partner-funded VIP events, built and run by NEXT.io alongside the summits your buyers already attend, or wrapped around a date and a city of your own. You host it and it carries your brand alone. We find the venue, build it, fill the room from our network, run it on the night and report on who was actually there.</p>
   </div>
   <section><h2>The 2027 calendar</h2><table>${cal}</table>
-  <p class="mut">Summit dates are as published by the organisers and are confirmed with them before anything is booked. Off-calendar builds carry a premium of around ${Math.round((SUMMITS.find((s) => s.id === 'offcal').premium) * 100)}%, because outside a summit week nothing — crew, freight, venue or guest travel — is shared with another event.</p></section>
+  <p class="mut">Summit dates are as published by the organisers and are confirmed with them before anything is booked. Off-calendar builds carry a premium of around ${Math.round((SUMMITS.find((s) => s.id === 'offcal').premium) * 100)}%, because outside a summit week nothing (crew, freight, venue or guest travel) is shared with another event.</p></section>
   <section><h2>The format</h2>${formats}
   <p class="mut">${SHOW_INVESTMENT ? `The fee is fixed for the format as specified and covers up to ${FORMATS[0].feeCovers} guests: venue, production, staffing, branding and the guest list. We build rooms up to ${MAX_GUESTS}; additional guests and catering are quoted against your brief.` : ''}</p></section>
   <section><h2>How the room gets built</h2>
@@ -658,7 +658,7 @@ function downloadBrochurePDF() {
   <div class="foot">
     <strong>Start a brief:</strong> sales@next.io &nbsp;&middot;&nbsp; next.io<br>
     First response in one working day &middot; a budget figure in two &middot; a straight answer on deliverability in three &middot; full proposal in five.<br>
-    ${SHOW_INVESTMENT ? `The Drinks Reception fee is fixed for the format as specified and covers up to ${FORMATS[0].feeCovers} guests. It excludes VAT. Larger rooms — we build up to ${MAX_GUESTS} — additional catering and anything outside the specification are quoted against your brief.<br>` : ''}
+    ${SHOW_INVESTMENT ? `The Drinks Reception fee is fixed for the format as specified and covers up to ${FORMATS[0].feeCovers} guests. It excludes VAT. Larger rooms (we build up to ${MAX_GUESTS}), additional catering and anything outside the specification are quoted against your brief.<br>` : ''}
     Generated ${date}
   </div>
   </body></html>`
@@ -776,7 +776,7 @@ function TrackRecordNote(props) {
       The founders of Events by Martin have produced more than 800 events around the world across two decades,
       a track record that became NEXT.io and now NEXTPredict. The thirteen above are the partner-hosted events
       we have delivered since 2024: Rome, Barcelona, Malta, London and SBC Summit Americas in Florida. Our
-      longest-standing host has run seven of them with us across four cities — which is the number we would
+      longest-standing host has run seven of them with us across four cities. That is the number we would
       rather be judged on than any of the others.
     </p>
   )
@@ -818,8 +818,8 @@ function FormatInvestment({ f, size = 'card', className = '' }) {
           <p className={`${z.fig} font-bold gold-text leading-none`}>{fmtPrice(roundTo(entry, 1000))}</p>
           <p className={`${z.note} text-brand-gray mt-2.5 leading-relaxed`}>
             {f.fee != null
-              ? <>A fixed fee for the format as specified, covering up to <span className="text-brand-white font-semibold">{f.feeCovers} guests</span>. We build rooms up to {f.max} — anything above {f.feeCovers} is quoted on the brief.</>
-              : <>at {f.min} guests, then about <span className="text-brand-white font-semibold">{fmtPrice(f.perGuest)} a guest</span> on top — roughly {fmtPrice(roundTo(indicative(f, f.max), 1000))} at {f.max}.</>}
+              ? <>A fixed fee for the format as specified, covering up to <span className="text-brand-white font-semibold">{f.feeCovers} guests</span>. We build rooms up to {f.max}, and anything above {f.feeCovers} is quoted on the brief.</>
+              : <>at {f.min} guests, then about <span className="text-brand-white font-semibold">{fmtPrice(f.perGuest)} a guest</span> on top, roughly {fmtPrice(roundTo(indicative(f, f.max), 1000))} at {f.max}.</>}
           </p>
         </>
       )}
@@ -1333,9 +1333,9 @@ function BriefSummary({ brief, className = 'glass-gold rounded-3xl p-7', copyCla
       <dl className="space-y-4 mb-6">
         {[
           ['Occasion', smt ? smt.name : 'Not chosen yet'],
-          ['Where / when', smt ? `${smt.city} · ${smt.dates}` : '—'],
+          ['Where / when', smt ? `${smt.city} · ${smt.dates}` : '–'],
           ['Format', fmt ? fmt.name : 'Not chosen yet'],
-          ['Guests', fmt ? `approx. ${brief.guests}` : '—'],
+          ['Guests', fmt ? `approx. ${brief.guests}` : '–'],
           ['Lead time', fmt ? fmt.notice : FORMATS[0].notice],
         ].map(([k, v]) => (
           <div key={k} className="flex justify-between gap-4 border-b border-brand-white/10 pb-3">
@@ -1351,17 +1351,17 @@ function BriefSummary({ brief, className = 'glass-gold rounded-3xl p-7', copyCla
             {fmt ? (fmt.fee != null ? `Fee, covering ${fmt.feeCovers} guests` : `Indicative at ${brief.guests} guests`) : 'Investment'}
           </p>
           <p className={`text-2xl font-bold leading-tight ${fmt ? 'gold-text' : 'text-brand-gray/60'}`}>
-            {!fmt ? '—' : est == null ? 'Quoted on brief' : fmtBand(est, fmt)}
+            {!fmt ? '–' : est == null ? 'Quoted on brief' : fmtBand(est, fmt)}
           </p>
           {fmt && overCount(fmt, brief.guests) > 0 && (
             <p className="text-[11px] text-brand-champagne mt-3 leading-relaxed">
-              Plus {overCount(fmt, brief.guests)} guests beyond the {fmt.feeCovers} the fee covers — catering for those is
+              Plus {overCount(fmt, brief.guests)} guests beyond the {fmt.feeCovers} the fee covers. Catering for those is
               quoted against your brief, never added afterwards.
             </p>
           )}
           {premium > 0 && est != null && (
             <p className="text-[11px] text-brand-champagne mt-3 leading-relaxed">
-              Includes the +{Math.round(premium * 100)}% off-calendar premium — outside a summit week, nothing is shared.
+              Includes the +{Math.round(premium * 100)}% off-calendar premium: outside a summit week, nothing is shared.
             </p>
           )}
           <p className="text-[11px] text-brand-gray mt-3 leading-relaxed">
