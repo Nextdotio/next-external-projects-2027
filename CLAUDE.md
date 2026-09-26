@@ -102,3 +102,84 @@ Stuart: "it's hard to find products when i have to scroll right down for them".
   links (`…/#formats`) are landed again after render and while Inter swaps in, until
   the reader scrolls. `#brief` is `overflow-clip`, not `overflow-hidden`: a hidden
   section is a scroll container, and the sticky summary never stuck.
+
+## Present mode and seller tools (26 Sep 2026)
+
+Stuart: "Make all brochures beautiful, easy to navigate, easy to understand for buyers,
+and easy for our sellers to take the buyers through and convince them to buy each and
+every product."
+
+- **Present mode** is a full-screen walk-through for a screen share. The shell (URL,
+  keys, swipe, focus, scroll lock, slide list) is `src/PresentMode.jsx`; the deck is
+  `buildSlides` and the `*Slide` components in `src/App.jsx`. Entry points: Present in
+  the nav (an icon from md, labelled from xl, in the section menu on a phone), Present
+  beside Print the brochure in the hero, and a quiet Present on the format card and on
+  every calendar row, which opens the deck on that card's slide.
+- **The deck, 16 slides (17 once the brief has something in it):** cover (the hero's
+  eyebrow, headline and chips, an "In this presentation" list, and `HeroOffer` itself,
+  whose parts jump to their slides) → What it is (`PILLARS`) → Track record
+  (`TRACK_RECORD` and `TrackRecordNote`) → the format (one slide per `FORMATS` entry; a
+  family slide is added if there are ever two or more) → the 2027 calendar (family
+  slide) → one slide per `SUMMITS` slot → The room (`ROOM_STATS`, `ROOM_STEPS`) → Twelve
+  weeks (`TIMELINE`, condensed to week, title and line) → Your report (`REPORT_IN`,
+  `PIPELINE`) → How we work with you (`TERMS`) → Straight answers (`FAQS`, opened in
+  place) → Your brief (only when the brief has a slot or a format; `BriefSummary`) →
+  Next steps (the page's closing call to action, Build your brief, Print the brochure,
+  the enquiry mailto, and `RESPONSE`).
+- **Where the deck gets its data:** the same constants and components as the page.
+  `HEADS` holds every section's eyebrow, headline and lede; `PILLARS`, `TRACK_RECORD`,
+  `HERO_CHIPS`, `ROOM_STATS`, `PIPELINE`, `REPORT_TITLE` and `CALENDAR_NOTES` hold the
+  rest of the copy that appears on both; the arrays (`FORMATS`, `SUMMITS`, `ROOM_STEPS`,
+  `TIMELINE`, `REPORT_IN`, `TERMS`, `FAQS`, `RESPONSE`) feed both. A new slot, step,
+  term or question appears in the deck by itself. Edit the constant, never a slide,
+  and never re-type a figure onto one.
+- **Shared components, so their rules travel onto the slides:** `FormatInvestment` (the
+  fee with its 60-guest scope and the room ceiling, card and slide), `feeScope` (the
+  short form: cover and slot slides), `HeroOffer` (anchors on the page, buttons in the
+  deck through `onJump`), `BriefSummary` (fee, guests beyond it, off-calendar premium,
+  send, print, brief link), `FaqItem`, `TrackRecordNote`, `DateTile`, `Headline`.
+- **URL:** `?present` opens the cover; `?present=<slide id>` opens that slide, and the
+  address bar follows the slide (replaceState, so Back does not step through slides).
+  Product slides use the card's anchor: `formats`, `slot-ice`, `slot-igb`, `slot-sbc`,
+  `slot-sigma`, `slot-offcal`. The others: `cover`, `what-it-is`, `track-record`,
+  `calendar`, `the-room`, `how-it-works`, `report`, `terms`, `questions`, `your-brief`,
+  `next-steps`. Closing drops `present`; Back or Forward to an address without it
+  closes the deck.
+- **Keys:** → Space PageDown next, ← PageUp back, Home and End, G all slides, Esc closes
+  the slide list first and then the deck; swipe on touch. Focus returns to whatever
+  opened the deck; the page behind is inert and scroll-locked; reduced motion drops
+  the slide animation.
+- **Fit:** a typical slide fits 1280x800 without scrolling. The `short` variant in
+  `src/index.css` (max-height 820px) tightens the deck's spacing and type for that; a
+  long slide may scroll on a phone, and nothing scrolls sideways at 390. Check both
+  before adding content to a slide.
+- **Slide actions:** Add to brief goes through the page's own setters (`chooseFormat`,
+  `chooseSummit`, the same ones the format card, the calendar rows and the brief
+  builder use), so the deck and the page can never disagree about the brief. Open the
+  card (Open the slot) closes the deck and lands on the card through `landOn`, which
+  also moves focus there. Copy link sits beside them.
+- **Copy link** (`CopyLinkButton`) is on the format card (`#formats`), every calendar
+  row (`#slot-<id>`) and every product slide: this page plus the card's anchor, never
+  `present`, and it says "Link copied". Quiet styling (`QUIET_ACTION`), never competing
+  with the price or Add to brief. The calendar row's main button stretches over the
+  whole row (`after:inset-0`), so clicking anywhere still starts a brief while Copy link
+  and Present sit above that layer. Never nest a button inside the row.
+- **Brief link:** "Copy brief link" in `BriefSummary` (on the page and on the Your brief
+  slide) copies `?plan=<slot id>,<format id>~<guests>#brief`, for example
+  `?plan=sbc,reception~120#brief`. On load App restores it through `chooseSummit` and
+  `chooseFormat`, fits the guest count to the slider (`fitGuests`: within the format's
+  60 to 350, on its step), skips anything it does not recognise, and drops `plan` from
+  the address bar. It says "brief" because that is what the page calls it.
+- **No goal chips:** the format and the slots carry no goal tags, so the product menu
+  pattern from the other brochures does not apply here.
+- **Rules to keep, on slides as on the page:** `SHOW_INVESTMENT = false` drops every fee
+  from the deck too; the fee never appears without the 60-guest scope and the 350
+  ceiling; the off-calendar premium is stated wherever that slot is priced; `MAX_GUESTS`
+  stays derived; the 13 partner-hosted events since 2024 and the 5 cities stay apart
+  from the 800+ (the Track record slide prints `TrackRecordNote` word for word); no
+  "approved", "signed off", "derived" or "KPI"; past clients are described, never
+  named. Buyer-facing words only: the button is "Present", and the page never says
+  seller, pitch, objection or close. No em dashes in new copy.
+- **Polish in the same pass:** the brief summary's small print before a format is
+  picked now follows the formats on offer (each carries a fixed fee), where it used to
+  say the figure "moves with guest numbers".

@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Screens up to 820px tall (a 1280x800 laptop): Present mode tightens its
+   spacing and type so a typical slide fits without scrolling. */
+@custom-variant short (@media (max-height: 820px));
+
 @theme {
   --color-brand-yellow: #ffcf33;
   --color-brand-gold: #d9a521;
@@ -133,4 +137,15 @@
 }
 .fade-up {
   animation: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Present mode: each slide slides in from the side it came from (PresentMode
+   skips the animation when the reader prefers reduced motion). */
+@keyframes pm-in-fwd {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes pm-in-back {
+  from { opacity: 0; transform: translateX(-24px); }
+  to   { opacity: 1; transform: none; }
 }
