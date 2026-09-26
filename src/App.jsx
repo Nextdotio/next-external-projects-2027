@@ -98,7 +98,7 @@ const SUMMITS = [
     month: 'Q4',
     status: 'tbc',
     premium: 0,
-    note: 'Edition dates are not published yet. Register interest and we will come back to you the day they are.',
+    note: 'Rome is one of the five cities where we have already delivered partner-hosted events. Edition dates are not published yet: register interest and we will come back to you the day they are.',
   },
   {
     id: 'offcal',
