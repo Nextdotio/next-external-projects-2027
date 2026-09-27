@@ -44,21 +44,25 @@ Confirm it prints `Published` before reporting done.
 - **`MAX_GUESTS`** is derived from `FORMATS`, so the hero chip and the printed
   brochure cannot drift from the largest room a published format actually builds.
   Never hardcode a guest ceiling.
-- **One approved format only** (Desi + Gerda, 17 Sep 2026): the Drinks Reception at a
-  firm €35,000. The other five were removed - they were derived from delivered-event
-  history, never an approved rate card. Do not reinstate one without a written approval.
-- **The fee is a fee, not a band.** `fee: 35000` + `feeCovers: 60` on the format;
-  `fmtBand` short-circuits for any format carrying a `fee`, because an approved figure
-  must not render as a ±8% range. The old `baseCost`/`perGuest` model still works for any
-  future format that is genuinely guest-scaled.
-- **€35,000 covers up to 60 guests; the room runs 60 to 350.** (Stuart, 17 Sep 2026 -
-  `min: 60, max: 350` on the format.) €35,000 was the 60-guest entry price in the old
-  model, ~€180 a guest beyond it, so publishing it flat across a 350-guest room gives
-  away ~€52,000 of catering. The card, the brief builder and both PDFs state the
-  60-guest fee scope *and* the 350 ceiling together - one without the other either
-  caps the sale or gives the build away. Never drop either line. The brief builder
-  shows a live "guests beyond the fee" count on the page, in the printout and in the
-  mailto.
+- **One format on sale: the Drinks Reception, from €65,000** (Stuart, 27 Sep 2026:
+  "65k as a 'starting from' for that type of project"). It replaces the firm
+  €35,000 of 17 Sep (Desi + Gerda): at that figure the fee could not carry both the
+  build and the per-event margin the 2027 plan sets. The other five formats were removed on 17 Sep - they were derived from
+  delivered-event history, never a rate card. Do not reinstate one without a
+  written decision.
+- **The fee is a starting price, not a band.** `fee: 65000`, `feeFrom: true`,
+  `feeCovers: 60` on the format. `feeFigure` prints it ("From €65,000") and every
+  place a fee appears reads it: the card, the first-screen offer, the brief
+  builder, the slides, both PDFs and the mailto. `fmtBand` short-circuits for any
+  format carrying a `fee`, so it never renders as a ±8% range. Drop `feeFrom` and
+  the same code prints a fixed fee again. The old `baseCost`/`perGuest` model
+  still works for any future format that is genuinely guest-scaled.
+- **From €65,000 covers up to 60 guests; the room runs 60 to 350.** (Stuart, 17 Sep
+  2026 - `min: 60, max: 350` on the format.) The card, the brief builder and both
+  PDFs state the 60-guest scope *and* the 350 ceiling together, and that the brief
+  sets the final fee - one without the other either caps the sale or gives the
+  build away. Never drop either line. The brief builder shows a live "guests beyond
+  the fee" count on the page, in the printout and in the mailto.
 - **Prices are behind a flag.** `SHOW_INVESTMENT` at the top of `src/App.jsx` toggles
   every indicative figure on the cards, in the brief builder and in both printouts. The
   model is derived from delivered-event history, not an approved price list — see
