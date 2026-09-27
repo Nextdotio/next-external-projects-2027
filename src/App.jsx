@@ -29,8 +29,9 @@ const SHOW_INVESTMENT = true
 const fmtPrice = (n) => '€' + Math.round(n).toLocaleString('en-US')
 const roundTo = (n, step) => Math.round(n / step) * step
 
-// The Drinks Reception fee is signed off, so it is quoted as a fee. Guests beyond
-// what the fee covers are catered on quote, never silently absorbed.
+// The Drinks Reception carries a starting price (`feeFrom`), quoted as a fee
+// from that figure, never as a band. Guests beyond what it covers are catered on
+// quote, never silently absorbed.
 const indicative = (f, guests, premium = 0) =>
   f.fee != null ? f.fee * (1 + premium)
     : f.baseCost == null ? null : (f.baseCost + f.perGuest * guests) * (1 + premium)
@@ -38,8 +39,11 @@ const overCount = (f, guests) => (f.fee != null && guests > f.feeCovers ? guests
 
 // Quotes show a range, not a point estimate — the underlying data is thin.
 const bandFor = (n) => [roundTo(n * 0.92, 1000), roundTo(n * 1.08, 1000)]
+// A fee as it prints: "From €65,000" for a starting price, the figure alone
+// for a fixed fee. Every place a fee figure appears reads this.
+const feeFigure = (f, n) => `${f.feeFrom ? 'From ' : ''}${fmtPrice(roundTo(n, 1000))}`
 const fmtBand = (n, f) => {
-  if (f && f.fee != null) return fmtPrice(roundTo(n, 1000))
+  if (f && f.fee != null) return feeFigure(f, n)
   const [lo, hi] = bandFor(n)
   return `${fmtPrice(lo)} – ${fmtPrice(hi)}`
 }
@@ -49,7 +53,7 @@ const fmtBand = (n, f) => {
 // without the other either caps the sale or gives the build away). The printed
 // brochure and the first-screen panel both read it, so they cannot drift apart.
 const feeScope = (f) => (f.fee != null
-  ? `A fixed fee covering up to ${f.feeCovers} guests · rooms to ${f.max} quoted on the brief`
+  ? `${f.feeFrom ? 'Starting price for' : 'A fixed fee covering'} up to ${f.feeCovers} guests · rooms to ${f.max} quoted on the brief`
   : `${f.min} guests to ${f.max} guests · about €${f.perGuest} a guest either way`)
 
 // House rule: NEXT.io and NEXTPredict keep their own casing, even inside a heading
@@ -133,10 +137,11 @@ const FORMATS = [
     min: 60, max: 350, def: 60,
     duration: 'One evening · 3–4 hours',
     notice: '8 weeks minimum',
-    // APPROVED: Drinks Reception at a firm EUR 35,000 covering the format for up
-    // to 60 guests. Beyond 60, catering is quoted on the brief. No derived band -
-    // this figure is signed off, not inferred.
-    fee: 35000, feeCovers: 60,
+    // Stuart, 27 Sep 2026: from EUR 65,000 for this type of project, a starting
+    // price covering the format for up to 60 guests (it replaces the firm
+    // EUR 35,000 of 17 Sep, which left no room for the event's own margin).
+    // Beyond 60, catering is quoted on the brief. Never a derived band.
+    fee: 65000, feeFrom: true, feeCovers: 60,
     baseCost: null, perGuest: null,
     bestFor: 'First-time hosts, market entries and launches that need volume and visibility rather than a seating plan.',
     included: [
@@ -320,7 +325,7 @@ const HEADS = {
     title: 'A proven format,', gold: 'not a blank page.',
     lede: [
       'We have built and run this many times over, which is why we can tell you exactly what it includes, what it does not, and how much notice it needs before you have signed anything.',
-      SHOW_INVESTMENT && 'The fee is fixed for the format as specified, so there are no surprises once the brief is agreed.',
+      SHOW_INVESTMENT && 'The price shown is where the format starts. Your brief sets the final fee, in writing, before anything is booked.',
     ],
   },
   calendar: {
@@ -536,7 +541,7 @@ function downloadBriefPDF(brief) {
       ${row('Format', fmt ? fmt.name : 'To be discussed')}
       ${row('Guest numbers', fmt ? `approx. ${brief.guests} · the room runs ${fmt.min} to ${fmt.max}` : 'To be discussed')}
       ${row('Minimum lead time', fmt ? fmt.notice : '8–16 weeks depending on format')}
-      ${SHOW_INVESTMENT ? row(fmt && fmt.fee != null ? `Fee, covering ${fmt.feeCovers} guests` : fmt ? `Indicative at ${brief.guests} guests` : 'Investment', est ? fmtBand(est, fmt) : 'Quoted on brief') : ''}
+      ${SHOW_INVESTMENT ? row(fmt && fmt.fee != null ? `${fmt.feeFrom ? 'Starting fee' : 'Fee'}, covering ${fmt.feeCovers} guests` : fmt ? `Indicative at ${brief.guests} guests` : 'Investment', est ? fmtBand(est, fmt) : 'Quoted on brief') : ''}
       ${SHOW_INVESTMENT && fmt && overCount(fmt, brief.guests) ? row('Guests beyond the fee', `${overCount(fmt, brief.guests)} - catering quoted on the brief`) : ''}
       ${SHOW_INVESTMENT && premium ? row('Off-calendar premium', `Included: +${Math.round(premium * 100)}% for a build outside a summit week`) : ''}
       ${row('Exclusivity', 'One host per event, no co-sponsors')}
@@ -583,7 +588,7 @@ function downloadBrochurePDF() {
     const eur = (v) => '€' + Math.round(roundTo(v, 1000)).toLocaleString('en-US')
     const price = !SHOW_INVESTMENT ? ''
       : lo == null ? 'POA'
-      : f.fee != null ? eur(lo)
+      : f.fee != null ? feeFigure(f, lo)
       : `${eur(lo)} – ${eur(hi)}`
     const scale = SHOW_INVESTMENT && lo != null ? `<div class="scale">${esc(feeScope(f))}</div>` : ''
     return `<div class="fmt">
@@ -647,7 +652,7 @@ function downloadBrochurePDF() {
   <section><h2>The 2027 calendar</h2><table>${cal}</table>
   <p class="mut">Summit dates are as published by the organisers and are confirmed with them before anything is booked. Off-calendar builds carry a premium of around ${Math.round((SUMMITS.find((s) => s.id === 'offcal').premium) * 100)}%, because outside a summit week nothing (crew, freight, venue or guest travel) is shared with another event.</p></section>
   <section><h2>The format</h2>${formats}
-  <p class="mut">${SHOW_INVESTMENT ? `The fee is fixed for the format as specified and covers up to ${FORMATS[0].feeCovers} guests: venue, production, staffing, branding and the guest list. We build rooms up to ${MAX_GUESTS}; additional guests and catering are quoted against your brief.` : ''}</p></section>
+  <p class="mut">${SHOW_INVESTMENT ? `The price is where the format starts and covers up to ${FORMATS[0].feeCovers} guests: venue, production, staffing, branding and the guest list. Your brief sets the final fee. We build rooms up to ${MAX_GUESTS}; additional guests and catering are quoted against your brief.` : ''}</p></section>
   <section><h2>How the room gets built</h2>
   <p style="margin-bottom:10px">Up to ${MAX_GUESTS} guests per event. We target three quarters of the room at C-level or head-of, and at least eighty per cent matching the criteria you set in writing. Your own list is merged in and de-duplicated. No blanket mailshots.</p>
   <p class="ch">Your post-event report covers</p><ul>${REPORT_IN.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>
@@ -658,7 +663,7 @@ function downloadBrochurePDF() {
   <div class="foot">
     <strong>Start a brief:</strong> sales@next.io &nbsp;&middot;&nbsp; next.io<br>
     First response in one working day &middot; a budget figure in two &middot; a straight answer on deliverability in three &middot; full proposal in five.<br>
-    ${SHOW_INVESTMENT ? `The Drinks Reception fee is fixed for the format as specified and covers up to ${FORMATS[0].feeCovers} guests. It excludes VAT. Larger rooms (we build up to ${MAX_GUESTS}), additional catering and anything outside the specification are quoted against your brief.<br>` : ''}
+    ${SHOW_INVESTMENT ? `The Drinks Reception starts ${feeFigure(FORMATS[0], FORMATS[0].fee).toLowerCase()} for the format as specified, covering up to ${FORMATS[0].feeCovers} guests, and excludes VAT. Your brief sets the final fee: larger rooms (we build up to ${MAX_GUESTS}), additional catering and anything outside the specification are quoted against it.<br>` : ''}
     Generated ${date}
   </div>
   </body></html>`
@@ -807,7 +812,7 @@ function FormatInvestment({ f, size = 'card', className = '' }) {
   const z = INVEST_SIZE[size]
   return (
     <div className={className}>
-      <p className="text-[10px] uppercase tracking-[0.25em] text-brand-gray mb-2">{f.fee != null ? 'Investment' : 'Indicative investment'}</p>
+      <p className="text-[10px] uppercase tracking-[0.25em] text-brand-gray mb-2">{f.fee != null ? (f.feeFrom ? 'Investment from' : 'Investment') : 'Indicative investment'}</p>
       {entry == null ? (
         <>
           <p className={`${z.fig} font-bold gold-text leading-none`}>Quoted on brief</p>
@@ -815,10 +820,12 @@ function FormatInvestment({ f, size = 'card', className = '' }) {
         </>
       ) : (
         <>
-          <p className={`${z.fig} font-bold gold-text leading-none`}>{fmtPrice(roundTo(entry, 1000))}</p>
+          <p className={`${z.fig} font-bold gold-text leading-none`}>{f.fee != null ? feeFigure(f, entry) : fmtPrice(roundTo(entry, 1000))}</p>
           <p className={`${z.note} text-brand-gray mt-2.5 leading-relaxed`}>
             {f.fee != null
-              ? <>A fixed fee for the format as specified, covering up to <span className="text-brand-white font-semibold">{f.feeCovers} guests</span>. We build rooms up to {f.max}, and anything above {f.feeCovers} is quoted on the brief.</>
+              ? (f.feeFrom
+                ? <>The starting price for the format as specified, covering up to <span className="text-brand-white font-semibold">{f.feeCovers} guests</span>. Your brief sets the final fee: we build rooms up to {f.max}, and anything above {f.feeCovers} is quoted with it.</>
+                : <>A fixed fee for the format as specified, covering up to <span className="text-brand-white font-semibold">{f.feeCovers} guests</span>. We build rooms up to {f.max}, and anything above {f.feeCovers} is quoted on the brief.</>)
               : <>at {f.min} guests, then about <span className="text-brand-white font-semibold">{fmtPrice(f.perGuest)} a guest</span> on top, roughly {fmtPrice(roundTo(indicative(f, f.max), 1000))} at {f.max}.</>}
           </p>
         </>
@@ -1323,7 +1330,8 @@ function BriefSummary({ brief, className = 'glass-gold rounded-3xl p-7', copyCla
   const ready = Boolean(brief.summit && brief.format)
   const started = Boolean(brief.summit || brief.format)
   // Before a format is picked, the small print follows the formats on offer:
-  // each one carries a fixed fee today, so it must not read as a moving estimate.
+  // each one carries a fee from a stated figure, so it must not read as a
+  // moving estimate.
   const feeTerms = fmt ? fmt.fee != null : FORMATS.every((f) => f.fee != null)
 
   return (
@@ -1348,7 +1356,7 @@ function BriefSummary({ brief, className = 'glass-gold rounded-3xl p-7', copyCla
       {SHOW_INVESTMENT && (
         <div className="rounded-2xl bg-brand-dark/70 border border-brand-white/10 p-5 mb-6">
           <p className="text-[10px] uppercase tracking-[0.25em] text-brand-gray mb-2">
-            {fmt ? (fmt.fee != null ? `Fee, covering ${fmt.feeCovers} guests` : `Indicative at ${brief.guests} guests`) : 'Investment'}
+            {fmt ? (fmt.fee != null ? `${fmt.feeFrom ? 'Starting fee' : 'Fee'}, covering ${fmt.feeCovers} guests` : `Indicative at ${brief.guests} guests`) : 'Investment'}
           </p>
           <p className={`text-2xl font-bold leading-tight ${fmt ? 'gold-text' : 'text-brand-gray/60'}`}>
             {!fmt ? '–' : est == null ? 'Quoted on brief' : fmtBand(est, fmt)}
@@ -1455,7 +1463,7 @@ function HeroOffer({ onJump, className = 'mt-9 sm:mt-10' }) {
                 {SHOW_INVESTMENT && (
                   <span className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-2">
                     <span className="text-4xl sm:text-[2.75rem] font-bold gold-text leading-none tabular-nums tracking-tight">
-                      {entry == null ? 'Quoted on brief' : fmtPrice(roundTo(entry, 1000))}
+                      {entry == null ? 'Quoted on brief' : f.fee != null ? feeFigure(f, entry) : fmtPrice(roundTo(entry, 1000))}
                     </span>
                     {entry != null && (
                       // broken at its " · " so neither clause splits across lines
@@ -2074,7 +2082,7 @@ function SlotSlide({ s, inBrief, onAdd, landOn }) {
               {SHOW_INVESTMENT && (
                 <>
                   <p className="mt-5 text-4xl sm:text-[2.75rem] font-bold gold-text leading-none tracking-tight">
-                    {entry == null ? 'Quoted on brief' : fmtPrice(roundTo(entry, 1000))}
+                    {entry == null ? 'Quoted on brief' : f.fee != null ? feeFigure(f, entry) : fmtPrice(roundTo(entry, 1000))}
                   </p>
                   {pct > 0 && entry != null && (
                     <p className="mt-2.5 text-sm font-bold text-brand-champagne">+{pct}% off-calendar premium</p>

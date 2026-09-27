@@ -68,9 +68,17 @@ of these with us across four cities"). Get written permission before naming anyo
 - **300 guests / 75% C-level / 80% of criteria** — the standards Relationships commits
   to, not measured outcomes. Worded as targets throughout.
 
-## Investment — one approved format, one approved fee
+## Investment — one format, one starting price
 
-**DECIDED (Desi + Gerda, 17 Sep 2026):** only one format is approved for sale, the
+**UPDATED (Stuart, 27 Sep 2026):** the Drinks Reception now sells **from €65,000**,
+a starting price for the format as specified, covering up to 60 guests, with the
+final fee set by the brief. At the firm €35,000 below, the fee could not carry both the
+build and the per-event margin the 2027 plan sets; the real all-in cost per event is
+still to be confirmed by Finance. `fee: 65000`, `feeFrom: true`; `feeFigure`
+prints "From €65,000" wherever a fee appears. The history below is kept as the
+record of how the €35,000 was set.
+
+**DECIDED (Desi + Gerda, 17 Sep 2026, superseded 27 Sep):** only one format is approved for sale, the
 **Drinks Reception at €35,000**. The other five formats have been removed from the
 brochure. They were never an approved price list - this README said so from the start
 ("**They are not an approved price list**", Appendix B: the point is faster quoting,
