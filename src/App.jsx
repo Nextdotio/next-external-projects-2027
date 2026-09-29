@@ -425,7 +425,7 @@ const TRACK_RECORD = [
   ['800+', 'Events delivered worldwide since Events by Martin'],
   ['13', 'Partner-hosted events delivered since 2024'],
   [String(HOSTED_CITIES.length), 'Cities where we have hosted events for partners'],
-  ['+69', 'Partner NPS, NEXT Summit Valletta 2026 · benchmark +27'],
+  ['+69', 'Partner NPS, NEXT Summit Valletta 2026 · benchmark +23'],
 ]
 
 // The hero's headline figures and the room's; the guest ceiling is MAX_GUESTS.

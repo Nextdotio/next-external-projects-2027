@@ -72,7 +72,8 @@ of these with us across four cities"). Get written permission before naming anyo
 - **The map** also shows NEXT.io's own summits (New York, Valletta) and retreats (Cyprus,
   Cancún), in their own pin style: they are proof of the team, not partner-hosted events.
 - **+69 partner NPS** — NEXT Summit Valletta 2026, as the Valletta card reports it (the
-  +27 benchmark is the survey platform's own column).
+  +23 benchmark is the survey platform's own column, from the July 2026 Explori report;
+  it read +27 until 29 Sep 2026, which the report does not carry).
 - **About €180 a guest beyond 60** — the Drinks Reception's per-guest rate (food and
   drink) in the delivered-event model this page priced from until 17 Sep (base €24,200 +
   €180 a guest). It drives the approximation shown across the 60 to 350 range, always
