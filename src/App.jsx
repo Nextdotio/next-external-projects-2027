@@ -68,8 +68,9 @@ const feeScope = (f) => (f.fee != null
   : `${f.min} guests to ${f.max} guests · about €${f.perGuest} a guest either way`)
 
 // House rule: NEXT.io and NEXTPredict keep their own casing, even inside a heading
-// that CSS sets in capitals (never NEXT.IO). Wrap data strings that render uppercase.
-const brandCase = (s) => String(s).split(/(NEXT\.io|NEXTPredict)/).map((part, i) =>
+// that CSS sets in capitals (never NEXT.IO), and so does iGaming (never IGAMING).
+// Wrap data strings that render uppercase.
+const brandCase = (s) => String(s).split(/(NEXT\.io|NEXTPredict|iGaming)/).map((part, i) =>
   (i % 2 ? <span key={i} className="normal-case">{part}</span> : part))
 
 // ─── 2027 calendar ────────────────────────────────────────────────────────
