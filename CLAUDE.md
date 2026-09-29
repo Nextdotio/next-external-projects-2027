@@ -191,6 +191,9 @@ every product."
   "approved", "signed off", "derived" or "KPI"; past clients are described, never
   named. Buyer-facing words only: the button is "Present", and the page never says
   seller, pitch, objection or close. No em dashes in new copy.
+- iGaming always renders with a lowercase i, including inside uppercase elements (Stuart, 29 Sep 2026).
+  `brandCase` keeps it cased on the page and in the deck; in a print template, wrap
+  it in a span with `text-transform:none`, as `.logo .io` does for NEXT.io.
 - **Polish in the same pass:** the brief summary's small print before a format is
   picked now follows the formats on offer (each carries a fixed fee), where it used to
   say the figure "moves with guest numbers".
