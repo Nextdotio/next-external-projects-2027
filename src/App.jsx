@@ -6,6 +6,7 @@ import {
   BadgeCheck, Crown, Route, Gauge, UserCheck, Eye, ChevronDown, Menu, X,
 } from 'lucide-react'
 import { PresentMode, usePresent, CopyLinkButton, QUIET_ACTION } from './PresentMode.jsx'
+import { LAND, MAP, MAP_W, MAP_H, project } from './worldmap.js'
 
 const base = import.meta.env.BASE_URL
 
@@ -36,6 +37,16 @@ const indicative = (f, guests, premium = 0) =>
   f.fee != null ? f.fee * (1 + premium)
     : f.baseCost == null ? null : (f.baseCost + f.perGuest * guests) * (1 + premium)
 const overCount = (f, guests) => (f.fee != null && guests > f.feeCovers ? guests - f.feeCovers : 0)
+// Stuart, 29 Sep 2026: "the price should at least have an approximation" across
+// the 60 to 350 range, "clearer that it's an approximation", and the quote
+// confirms it. Beyond the guests the starting price covers, each guest adds
+// about `perExtra` (food and drink: the reception's per-guest rate in the
+// delivered-event model this page priced from until 17 Sep). Every place that
+// shows it says it is approximate. Rounded to the nearest thousand.
+const approxFee = (f, guests, premium = 0) => (f.fee != null
+  ? (f.fee + overCount(f, guests) * (f.perExtra || 0)) * (1 + premium)
+  : indicative(f, guests, premium))
+const approxFigure = (f, guests, premium = 0) => fmtPrice(roundTo(approxFee(f, guests, premium), 1000))
 
 // Quotes show a range, not a point estimate — the underlying data is thin.
 const bandFor = (n) => [roundTo(n * 0.92, 1000), roundTo(n * 1.08, 1000)]
@@ -53,7 +64,7 @@ const fmtBand = (n, f) => {
 // without the other either caps the sale or gives the build away). The printed
 // brochure and the first-screen panel both read it, so they cannot drift apart.
 const feeScope = (f) => (f.fee != null
-  ? `${f.feeFrom ? 'Starting price for' : 'A fixed fee covering'} up to ${f.feeCovers} guests · rooms to ${f.max} quoted on the brief`
+  ? `${f.feeFrom ? 'Starting price for' : 'A fixed fee covering'} up to ${f.feeCovers} guests · ${f.perExtra ? `about ${approxFigure(f, f.max)} at ${f.max}` : `rooms to ${f.max} quoted on the brief`}`
   : `${f.min} guests to ${f.max} guests · about €${f.perGuest} a guest either way`)
 
 // House rule: NEXT.io and NEXTPredict keep their own casing, even inside a heading
@@ -102,7 +113,7 @@ const SUMMITS = [
     month: 'Q4',
     status: 'tbc',
     premium: 0,
-    note: 'Rome is one of the five cities where we have already delivered partner-hosted events. Edition dates are not published yet: register interest and we will come back to you the day they are.',
+    note: 'Rome is one of the cities where we have already hosted events for partners. Edition dates are not published yet: register interest and we will come back to you the day they are.',
   },
   {
     id: 'offcal',
@@ -141,7 +152,7 @@ const FORMATS = [
     // price covering the format for up to 60 guests (it replaces the firm
     // EUR 35,000 of 17 Sep, which left no room for the event's own margin).
     // Beyond 60, catering is quoted on the brief. Never a derived band.
-    fee: 65000, feeFrom: true, feeCovers: 60,
+    fee: 65000, feeFrom: true, feeCovers: 60, perExtra: 180,
     baseCost: null, perGuest: null,
     bestFor: 'First-time hosts, market entries and launches that need volume and visibility rather than a seating plan.',
     included: [
@@ -189,8 +200,8 @@ const ROOM_STEPS = [
   },
   {
     icon: Gauge,
-    title: 'We report honestly',
-    body: 'Registered against attended, the seniority mix you actually got, and where we fell short if we did.',
+    title: 'We report back',
+    body: 'Who came, how senior they were and who they met, measured against your brief.',
   },
 ]
 
@@ -255,8 +266,8 @@ const TIMELINE = [
   },
   {
     w: 'Week +1', short: '+1', t: 'Report and review',
-    b: 'The post-event report, a debrief, and what we would change for the next one.',
-    us: 'Who came, how senior, who met whom, and where we missed.',
+    b: 'The post-event report, a debrief, and the plan for the next one.',
+    us: 'Who came, how senior, and who met whom.',
     you: 'Tell us what to do differently. It goes into the next brief.',
   },
 ]
@@ -269,12 +280,11 @@ const RESPONSE = [
 ]
 
 const TERMS = [
-  { icon: Crown, t: 'One host per event', b: 'Your event carries your brand alone. No co-sponsors, no shared billing, and no competitor in the room.' },
   { icon: Building2, t: 'NEXT.io is the organiser', b: 'We contract the venue and the suppliers, we staff it, and we carry the operational risk of running it.' },
   { icon: ShieldCheck, t: 'Contract before commitment', b: 'Nothing is held or booked until the contract is signed and the deposit has cleared. That protects both sides.' },
   { icon: Route, t: 'Staged payments', b: 'A deposit on signature, the balance before the event, and any agreed extras invoiced afterwards.' },
   { icon: FileText, t: 'Changes are priced, then approved', b: 'Every change to an agreed scope is costed and signed off in writing before we act on it. No surprises on the final invoice.' },
-  { icon: Clock, t: 'Cancellation steps up', b: 'Cancellation terms are set out in the contract and increase as the date approaches, because supplier commitments do the same.' },
+  { icon: Clock, t: 'Cancellation, step by step', b: 'Before you sign, nothing is owed. Signature and the deposit hold the venue and suppliers for you, and from then cancellation charges rise at set dates as those bookings firm up. Your contract lists every date and amount before you sign it.' },
 ]
 
 const FAQS = [
@@ -292,11 +302,11 @@ const FAQS = [
   },
   {
     q: 'Who is actually in the room?',
-    a: 'Senior operators, suppliers, affiliates and studios from the NEXT.io network, filtered to your brief. We target three quarters of the room at C-level or head-of, and at least eighty per cent matching the criteria you set.',
+    a: 'Senior operators, suppliers, affiliates and studios from the NEXT.io network, chosen against your written brief and checked on the door.',
   },
   {
     q: 'What if fewer people turn up than we agreed?',
-    a: 'You get the real numbers. The post-event report shows registered against attended and the seniority mix you actually got. If we missed the brief, the report says so. That is the point of measuring it.',
+    a: 'You see the numbers early. The guest list is reviewed with you two weeks out, while there is still time to act, and the report shows registered against attended afterwards.',
   },
   {
     q: 'How quickly can you turn one around?',
@@ -313,12 +323,12 @@ const HEADS = {
   hero: {
     eyebrow: 'External Projects · 2027',
     title: 'Your Event.', gold: 'Our Room.',
-    lede: 'Partner-funded VIP events, built and run by NEXT.io alongside the summits your buyers already attend, or wrapped around a date and a city of your own. It carries your brand alone. We find the venue, build it, fill the room from our network, run it on the night, and tell you honestly who was there.',
+    lede: 'Your own VIP event, built and run by the NEXT.io events team alongside the summits your buyers already attend, or around a date and a city of your own.',
   },
   whatItIs: {
     eyebrow: 'What this actually is',
     title: 'Not a sponsorship.', gold: 'A room of your own.',
-    lede: 'No logo on someone else’s banner. An event of your own, in a city where the industry has already booked its flights, run end to end by the team that runs the NEXT.io summits.',
+    lede: 'No logo on someone else’s banner. An event of your own, in a city where the industry has already booked its flights.',
   },
   formats: {
     eyebrow: 'What we build',
@@ -336,7 +346,7 @@ const HEADS = {
   room: {
     eyebrow: 'The guest list',
     title: 'The room', gold: 'is the product.',
-    lede: 'Any agency can find you a venue. The reason to do this with NEXT.io is the guest list, and the fact that we will tell you afterwards how close we got to the one you asked for.',
+    lede: 'Any agency can find you a venue. The reason to do this with NEXT.io is the guest list: senior people from the network behind our summits, chosen against your brief.',
   },
   build: {
     eyebrow: 'The build',
@@ -352,7 +362,7 @@ const HEADS = {
   },
   terms: {
     title: 'How we work with you',
-    lede: 'The rules below exist because they keep events profitable for you and deliverable for us. None of them are negotiable at the last minute, which is the whole point of writing them here.',
+    lede: 'Agreed up front and written down, so both sides know where they stand from the first call to the final invoice.',
   },
   brief: {
     eyebrow: 'Start here',
@@ -374,18 +384,46 @@ const ledeText = (lede) => [].concat(lede).filter(Boolean).join(' ')
 // You host / we build and run / we fill the room.
 const PILLARS = [
   { icon: Crown, t: 'You host it', b: 'It is your event, your brand and your guests. One host per event: no co-sponsors, no shared billing and no competitor standing in the same room.' },
-  { icon: Building2, t: 'We build and run it', b: 'Venue, food and drink, production, branding, staffing and on-site management. NEXT.io is the organiser of record and carries the operational risk.' },
+  { icon: Building2, t: 'We build and run it', b: 'Venue, food and drink, production, branding, staffing and on-site management, by the team that runs the NEXT.io summits.' },
   { icon: Users, t: 'We fill the room', b: 'The guest list comes out of the NEXT.io network and is built against your written brief, then invited, chased and managed on the door.' },
 ]
 
+// ─── Where we have built events ────────────────────────────────────────────
+// Stuart, 29 Sep 2026: the cities as proof points, on a map. `partner` is where
+// we have hosted events for partners (Rome, Barcelona, Malta, London, Lisbon,
+// Florida, Las Vegas: Florida is SBC Summit Americas); `summit` and `retreat`
+// are NEXT.io's own. Malta is both. `label` is the side of the pin its name
+// sits on, from md up; below md the list under the map carries the names.
+const EVENT_CITIES = [
+  { name: 'London', lat: 51.51, lon: -0.13, kinds: ['partner'], label: 'left' },
+  { name: 'Lisbon', lat: 38.72, lon: -9.14, kinds: ['partner'], label: 'left' },
+  { name: 'Barcelona', lat: 41.39, lon: 2.17, kinds: ['partner'], label: 'top' },
+  { name: 'Rome', lat: 41.9, lon: 12.5, kinds: ['partner'], label: 'right' },
+  { name: 'Malta', lat: 35.9, lon: 14.51, kinds: ['partner', 'summit'], label: 'bottom' },
+  { name: 'Cyprus', lat: 34.92, lon: 33.3, kinds: ['retreat'], label: 'top' },
+  { name: 'New York', lat: 40.71, lon: -74.01, kinds: ['summit'], label: 'right' },
+  { name: 'Florida', lat: 26.12, lon: -80.14, kinds: ['partner'], label: 'right' },
+  { name: 'Las Vegas', lat: 36.17, lon: -115.14, kinds: ['partner'], label: 'right' },
+  { name: 'Cancún', lat: 21.16, lon: -86.85, kinds: ['retreat'], label: 'bottom' },
+]
+const CITY_KINDS = [
+  ['partner', 'Hosted for partners'],
+  ['summit', 'NEXT summits'],
+  ['retreat', 'NEXT retreats'],
+]
+const HOSTED_CITIES = EVENT_CITIES.filter((c) => c.kinds.includes('partner'))
+
 // Track record. The 800+ is the founders' lifetime output since Events by Martin;
-// the 13 and the 5 are partner-hosted events since 2024. TrackRecordNote keeps
-// the two apart wherever the figures appear (CLAUDE.md - never merge or round).
+// the 13 are partner-hosted events since 2024. TrackRecordNote keeps the two
+// apart wherever the figures appear (CLAUDE.md - never merge or round). The
+// city count is the map's; +69 is NEXT Summit Valletta's 2026 partner NPS as
+// its card reports it (the benchmark is the survey platform's). The 75% C-level
+// target is said once, in the room (Stuart, 29 Sep 2026: "we repeat the 75%").
 const TRACK_RECORD = [
   ['800+', 'Events delivered worldwide since Events by Martin'],
   ['13', 'Partner-hosted events delivered since 2024'],
-  ['5', 'Host cities across Europe and the US'],
-  ['75%', 'Target C-level and head-of'],
+  [String(HOSTED_CITIES.length), 'Cities where we have hosted events for partners'],
+  ['+69', 'Partner NPS, NEXT Summit Valletta 2026 · benchmark +27'],
 ]
 
 // The hero's headline figures and the room's; the guest ceiling is MAX_GUESTS.
@@ -393,20 +431,22 @@ const HERO_CHIPS = [
   [CalendarDays, 'Five slots in 2027'],
   [Crown, 'One host per event'],
   [Users, `Up to ${MAX_GUESTS} curated guests`],
-  [BadgeCheck, '75% C-level target'],
+  [BadgeCheck, 'Run by the NEXT summit team'],
 ]
 const ROOM_STATS = [
   [String(MAX_GUESTS), 'Guests at the largest room we build'],
   ['75%', 'Target C-level and head-of'],
   ['80%', 'Of your written guest criteria'],
-  ['1', 'Host per event, always'],
+  ['3', 'WhatsApp reminders before the night'],
 ]
 
-// The report: what it covers is REPORT_IN; what it does not is this.
+// The report's other half: what the evening sets up for you (Stuart, 29 Sep
+// 2026: "flip it around and present it as a positive": we provide the
+// opportunity, they connect, they close it afterwards).
 const PIPELINE = {
-  title: 'What it does not cover',
-  big: 'Your pipeline.',
-  body: 'We can tell you exactly who walked in, how senior they were, who they met and what they thought of the evening. What that becomes commercially is yours to run, and we would rather say that now than dress an attendance number up as revenue in three months’ time.',
+  title: 'What happens next',
+  big: 'Your opportunities.',
+  body: 'We create the opportunity: the right people in the room, introductions made on the night, and a report of who you met. You close it: every conversation is yours to follow up, and the report shows you where to start.',
 }
 const REPORT_TITLE = 'What your report covers'
 
@@ -438,7 +478,7 @@ function buildMailto(brief) {
     `  Guests:        ${fmt ? `approx. ${brief.guests}` : 'To be discussed'}`,
     fmt ? `  Lead time:     ${fmt.notice}` : null,
     SHOW_INVESTMENT && fmt
-      ? `  ${fmt && fmt.fee != null ? 'Fee:          ' : 'Indicative:   '} ${est ? (fmt && fmt.fee != null ? `${fmtBand(est, fmt)} covering ${fmt.feeCovers} guests${overCount(fmt, brief.guests) ? `, plus ${overCount(fmt, brief.guests)} on quote` : ''}` : `${fmtBand(est)} at ${brief.guests} guests`) : 'quoted on brief'}${premium ? ' (includes off-calendar premium)' : ''}`
+      ? `  ${fmt && fmt.fee != null ? 'Fee:          ' : 'Indicative:   '} ${est ? (fmt && fmt.fee != null ? `${fmtBand(est, fmt)} covering ${fmt.feeCovers} guests${overCount(fmt, brief.guests) ? (fmt.perExtra ? `; approx. ${approxFigure(fmt, brief.guests, premium)} for ${brief.guests} guests, to be quoted` : `, plus ${overCount(fmt, brief.guests)} on quote`) : ''}` : `${fmtBand(est)} at ${brief.guests} guests`) : 'quoted on brief'}${premium ? ' (includes off-calendar premium)' : ''}`
       : null,
     '',
     'Our objectives for the event:',
@@ -542,7 +582,9 @@ function downloadBriefPDF(brief) {
       ${row('Guest numbers', fmt ? `approx. ${brief.guests} · the room runs ${fmt.min} to ${fmt.max}` : 'To be discussed')}
       ${row('Minimum lead time', fmt ? fmt.notice : '8–16 weeks depending on format')}
       ${SHOW_INVESTMENT ? row(fmt && fmt.fee != null ? `${fmt.feeFrom ? 'Starting fee' : 'Fee'}, covering ${fmt.feeCovers} guests` : fmt ? `Indicative at ${brief.guests} guests` : 'Investment', est ? fmtBand(est, fmt) : 'Quoted on brief') : ''}
-      ${SHOW_INVESTMENT && fmt && overCount(fmt, brief.guests) ? row('Guests beyond the fee', `${overCount(fmt, brief.guests)} - catering quoted on the brief`) : ''}
+      ${SHOW_INVESTMENT && fmt && overCount(fmt, brief.guests) ? (fmt.perExtra
+        ? row(`Approximate fee for ${brief.guests} guests`, `About ${approxFigure(fmt, brief.guests, premium)}: ${feeFigure(fmt, fmt.fee).toLowerCase()} for the first ${fmt.feeCovers}, plus about ${fmtPrice(fmt.perExtra)} a guest beyond. Confirmed by your quote.`)
+        : row('Guests beyond the fee', `${overCount(fmt, brief.guests)} - catering quoted on the brief`)) : ''}
       ${SHOW_INVESTMENT && premium ? row('Off-calendar premium', `Included: +${Math.round(premium * 100)}% for a build outside a summit week`) : ''}
       ${row('Exclusivity', 'One host per event, no co-sponsors')}
     </table>
@@ -652,18 +694,18 @@ function downloadBrochurePDF() {
   <section><h2>The 2027 calendar</h2><table>${cal}</table>
   <p class="mut">Summit dates are as published by the organisers and are confirmed with them before anything is booked. Off-calendar builds carry a premium of around ${Math.round((SUMMITS.find((s) => s.id === 'offcal').premium) * 100)}%, because outside a summit week nothing (crew, freight, venue or guest travel) is shared with another event.</p></section>
   <section><h2>The format</h2>${formats}
-  <p class="mut">${SHOW_INVESTMENT ? `The price is where the format starts and covers up to ${FORMATS[0].feeCovers} guests: venue, production, staffing, branding and the guest list. Your brief sets the final fee. We build rooms up to ${MAX_GUESTS}; additional guests and catering are quoted against your brief.` : ''}</p></section>
+  <p class="mut">${SHOW_INVESTMENT ? `The price is where the format starts and covers up to ${FORMATS[0].feeCovers} guests: venue, production, staffing, branding and the guest list. ${FORMATS[0].perExtra ? `Each guest beyond that adds about ${fmtPrice(FORMATS[0].perExtra)}, so a room of ${MAX_GUESTS} comes to roughly ${approxFigure(FORMATS[0], MAX_GUESTS)}: an approximation, and your brief sets the final fee.` : `Your brief sets the final fee. We build rooms up to ${MAX_GUESTS}; additional guests and catering are quoted against your brief.`}` : ''}</p></section>
   <section><h2>How the room gets built</h2>
   <p style="margin-bottom:10px">Up to ${MAX_GUESTS} guests per event. We target three quarters of the room at C-level or head-of, and at least eighty per cent matching the criteria you set in writing. Your own list is merged in and de-duplicated. No blanket mailshots.</p>
   <p class="ch">Your post-event report covers</p><ul>${REPORT_IN.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>
-  <p style="margin-top:10px"><strong>What it does not cover:</strong> your pipeline. We can tell you exactly who walked in, how senior they were and who they met. What that becomes commercially is yours to run.</p></section>
+  <p style="margin-top:10px"><strong>${esc(PIPELINE.title)}:</strong> ${esc(PIPELINE.body)}</p></section>
   <section><h2>From brief to event in twelve weeks</h2><table>${steps}</table>
   <p class="mut">Eight weeks is usually enough if you have hosted with us before.</p></section>
   <section><h2>How we work with you</h2><ol>${terms}</ol></section>
   <div class="foot">
     <strong>Start a brief:</strong> sales@next.io &nbsp;&middot;&nbsp; next.io<br>
     First response in one working day &middot; a budget figure in two &middot; a straight answer on deliverability in three &middot; full proposal in five.<br>
-    ${SHOW_INVESTMENT ? `The Drinks Reception starts ${feeFigure(FORMATS[0], FORMATS[0].fee).toLowerCase()} for the format as specified, covering up to ${FORMATS[0].feeCovers} guests, and excludes VAT. Your brief sets the final fee: larger rooms (we build up to ${MAX_GUESTS}), additional catering and anything outside the specification are quoted against it.<br>` : ''}
+    ${SHOW_INVESTMENT ? `The Drinks Reception starts ${feeFigure(FORMATS[0], FORMATS[0].fee).toLowerCase()} for the format as specified, covering up to ${FORMATS[0].feeCovers} guests, and excludes VAT. ${FORMATS[0].perExtra ? `Each guest beyond ${FORMATS[0].feeCovers} adds about ${fmtPrice(FORMATS[0].perExtra)} (roughly ${approxFigure(FORMATS[0], MAX_GUESTS)} at ${MAX_GUESTS}), an approximation: your brief sets the final fee.` : `Your brief sets the final fee: larger rooms (we build up to ${MAX_GUESTS}), additional catering and anything outside the specification are quoted against it.`}<br>` : ''}
     Generated ${date}
   </div>
   </body></html>`
@@ -779,11 +821,68 @@ function TrackRecordNote(props) {
   return (
     <p {...props}>
       The founders of Events by Martin have produced more than 800 events around the world across two decades,
-      a track record that became NEXT.io and now NEXTPredict. The thirteen above are the partner-hosted events
-      we have delivered since 2024: Rome, Barcelona, Malta, London and SBC Summit Americas in Florida. Our
-      longest-standing host has run seven of them with us across four cities. That is the number we would
-      rather be judged on than any of the others.
+      a track record that became NEXT.io and now NEXTPredict. The thirteen are the partner-hosted events we
+      have delivered since 2024, and our longest-standing host has run seven of them with us across four
+      cities. The map shows every city where the team has built events: for partners, at our own summits and
+      at our retreats.
     </p>
+  )
+}
+
+// ─── The events map ────────────────────────────────────────────────────────
+// Every city in EVENT_CITIES as a pin on the dot map: a filled pin where we
+// have hosted events for partners, a ring for NEXT.io's own summits and
+// retreats (Malta carries both). Names sit on the map from md up; below md,
+// and for screen readers, the list underneath names every city by kind.
+const MAP_DOTS = LAND.flatMap((row, r) => [...row].map((c, k) => (c === '1'
+  ? `M${(k * MAP.cell + MAP.cell / 2 - 0.34).toFixed(2)} ${(r * MAP.cell + MAP.cell / 2).toFixed(2)}a.34 .34 0 1 0 .68 0a.34 .34 0 1 0 -.68 0` : ''))).join('')
+const MAP_LABEL = {
+  right: 'left-3.5 top-1/2 -translate-y-1/2',
+  left: 'right-3.5 top-1/2 -translate-y-1/2 text-right',
+  top: 'bottom-3.5 left-1/2 -translate-x-1/2 text-center',
+  bottom: 'top-3.5 left-1/2 -translate-x-1/2 text-center',
+}
+function CityPin({ kinds }) {
+  const partner = kinds.includes('partner')
+  const own = kinds.some((k) => k !== 'partner')
+  return (
+    <>
+      {own && <span className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-brand-yellow" />}
+      {partner && <span className="absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-yellow shadow-[0_0_14px_rgba(255,207,51,0.85)]" />}
+    </>
+  )
+}
+function EventsMap({ compact = false, className = '' }) {
+  return (
+    <div className={className}>
+      <div aria-hidden="true" className="relative" style={{ aspectRatio: `${MAP_W} / ${MAP_H}` }}>
+        <svg viewBox={`0 0 ${MAP_W} ${MAP_H}`} className="absolute inset-0 h-full w-full overflow-visible">
+          <path d={MAP_DOTS} fill="#ffffff" fillOpacity="0.16" />
+        </svg>
+        {EVENT_CITIES.map((c) => {
+          const [x, y] = project(c.lat, c.lon)
+          return (
+            <div key={c.name} className="absolute" style={{ left: `${(x / MAP_W) * 100}%`, top: `${(y / MAP_H) * 100}%` }}>
+              <CityPin kinds={c.kinds} />
+              <span className={`absolute hidden md:block whitespace-nowrap font-bold text-brand-white leading-none ${compact ? 'text-[11px]' : 'text-[12px] lg:text-[13px]'} ${MAP_LABEL[c.label]}`}>{c.name}</span>
+            </div>
+          )
+        })}
+      </div>
+      <ul className={`mt-5 grid gap-x-8 gap-y-2 ${compact ? 'sm:grid-cols-3 text-[13px]' : 'md:grid-cols-3 text-sm'}`}>
+        {CITY_KINDS.map(([kind, label]) => (
+          <li key={kind} className="flex items-start gap-3">
+            <span className="relative mt-[7px] h-4 w-4 shrink-0">
+              <span className="absolute left-1/2 top-1/2"><CityPin kinds={[kind]} /></span>
+            </span>
+            <span>
+              <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow/90">{label}</span>
+              <span className="text-brand-white/85">{EVENT_CITIES.filter((c) => c.kinds.includes(kind)).map((c) => (kind === 'summit' && c.name === 'Malta' ? 'Valletta' : c.name)).join(', ')}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }
 
@@ -824,7 +923,7 @@ function FormatInvestment({ f, size = 'card', className = '' }) {
           <p className={`${z.note} text-brand-gray mt-2.5 leading-relaxed`}>
             {f.fee != null
               ? (f.feeFrom
-                ? <>The starting price for the format as specified, covering up to <span className="text-brand-white font-semibold">{f.feeCovers} guests</span>. Your brief sets the final fee: we build rooms up to {f.max}, and anything above {f.feeCovers} is quoted with it.</>
+                ? <>The starting price for the format as specified, covering up to <span className="text-brand-white font-semibold">{f.feeCovers} guests</span>.{f.perExtra ? <> Each guest beyond adds about <span className="text-brand-white font-semibold">{fmtPrice(f.perExtra)}</span>: roughly <span className="text-brand-white font-semibold">{approxFigure(f, f.max)}</span> at {f.max}, an approximation. Your brief sets the final fee.</> : <> Your brief sets the final fee: we build rooms up to {f.max}, and anything above {f.feeCovers} is quoted with it.</>}</>
                 : <>A fixed fee for the format as specified, covering up to <span className="text-brand-white font-semibold">{f.feeCovers} guests</span>. We build rooms up to {f.max}, and anything above {f.feeCovers} is quoted on the brief.</>)
               : <>at {f.min} guests, then about <span className="text-brand-white font-semibold">{fmtPrice(f.perGuest)} a guest</span> on top, roughly {fmtPrice(roundTo(indicative(f, f.max), 1000))} at {f.max}.</>}
           </p>
@@ -1292,6 +1391,12 @@ function BriefBuilder({ brief, setBrief, chooseSummit, chooseFormat }) {
               <div className="flex justify-between text-[10px] uppercase tracking-[0.2em] text-brand-gray mt-1">
                 <span>{fmt.min}</span><span>{fmt.max}</span>
               </div>
+              {SHOW_INVESTMENT && fmt.fee != null && fmt.perExtra > 0 && (
+                <p className="text-[12px] text-brand-gray mt-5 leading-relaxed">
+                  About <span className="text-brand-white font-semibold">{approxFigure(fmt, brief.guests, SUMMITS.find((s) => s.id === brief.summit)?.premium || 0)}</span> for {brief.guests} guests.
+                  The starting price covers {fmt.feeCovers}; each guest beyond adds about {fmtPrice(fmt.perExtra)} in food and drink. An approximation until we quote your brief.
+                </p>
+              )}
               {SHOW_INVESTMENT && fmt.baseCost != null && (
                 <p className="text-[11px] text-brand-gray mt-5 leading-relaxed">
                   Moving this moves the number. Food, drink, kit and transfers scale with the room at about{' '}
@@ -1327,6 +1432,7 @@ function BriefSummary({ brief, className = 'glass-gold rounded-3xl p-7', copyCla
   const smt = SUMMITS.find((s) => s.id === brief.summit)
   const premium = smt?.premium || 0
   const est = fmt ? indicative(fmt, brief.guests, premium) : null
+  const over = fmt ? overCount(fmt, brief.guests) : 0
   const ready = Boolean(brief.summit && brief.format)
   const started = Boolean(brief.summit || brief.format)
   // Before a format is picked, the small print follows the formats on offer:
@@ -1356,15 +1462,16 @@ function BriefSummary({ brief, className = 'glass-gold rounded-3xl p-7', copyCla
       {SHOW_INVESTMENT && (
         <div className="rounded-2xl bg-brand-dark/70 border border-brand-white/10 p-5 mb-6">
           <p className="text-[10px] uppercase tracking-[0.25em] text-brand-gray mb-2">
-            {fmt ? (fmt.fee != null ? `${fmt.feeFrom ? 'Starting fee' : 'Fee'}, covering ${fmt.feeCovers} guests` : `Indicative at ${brief.guests} guests`) : 'Investment'}
+            {fmt ? (fmt.fee != null ? (over > 0 && fmt.perExtra ? `Approximate fee for ${brief.guests} guests` : `${fmt.feeFrom ? 'Starting fee' : 'Fee'}, covering ${fmt.feeCovers} guests`) : `Indicative at ${brief.guests} guests`) : 'Investment'}
           </p>
           <p className={`text-2xl font-bold leading-tight ${fmt ? 'gold-text' : 'text-brand-gray/60'}`}>
-            {!fmt ? '–' : est == null ? 'Quoted on brief' : fmtBand(est, fmt)}
+            {!fmt ? '–' : est == null ? 'Quoted on brief' : over > 0 && fmt.perExtra ? `About ${approxFigure(fmt, brief.guests, premium)}` : fmtBand(est, fmt)}
           </p>
-          {fmt && overCount(fmt, brief.guests) > 0 && (
+          {over > 0 && (
             <p className="text-[11px] text-brand-champagne mt-3 leading-relaxed">
-              Plus {overCount(fmt, brief.guests)} guests beyond the {fmt.feeCovers} the fee covers. Catering for those is
-              quoted against your brief, never added afterwards.
+              {fmt.perExtra
+                ? <>{feeFigure(fmt, fmt.fee)} for the first {fmt.feeCovers} guests, plus about {fmtPrice(fmt.perExtra)} a guest in food and drink for the {over} beyond. An approximation: your quote confirms the fee.</>
+                : <>Plus {over} guests beyond the {fmt.feeCovers} the fee covers. Catering for those is quoted against your brief, never added afterwards.</>}
             </p>
           )}
           {premium > 0 && est != null && (
@@ -1873,20 +1980,24 @@ function WhatSlide() {
   )
 }
 
-// Track record: the page's four figures and the line that keeps them apart.
+// Track record: the page's four figures beside the map, then the line that
+// keeps the figures apart.
 function RecordSlide() {
   return (
     <>
       <Eyebrow>Track record</Eyebrow>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {TRACK_RECORD.map(([n, l]) => (
-          <div key={l} className="glass rounded-3xl px-5 sm:px-7 py-7 sm:py-10">
-            <p className="text-5xl sm:text-6xl lg:text-7xl font-bold gold-text leading-none tracking-tight mb-4">{n}</p>
-            <p className="text-brand-gray text-[10px] sm:text-[11px] uppercase tracking-[0.16em] leading-snug">{l}</p>
-          </div>
-        ))}
+      <div className="grid lg:grid-cols-12 gap-5 lg:gap-8 items-center">
+        <div className="lg:col-span-5 grid grid-cols-2 gap-3">
+          {TRACK_RECORD.map(([n, l]) => (
+            <div key={l} className="glass rounded-3xl px-5 py-5 sm:px-6 sm:py-6">
+              <p className="text-4xl sm:text-5xl font-bold gold-text leading-none tracking-tight mb-3">{n}</p>
+              <p className="text-brand-gray text-[10px] sm:text-[11px] uppercase tracking-[0.16em] leading-snug">{l}</p>
+            </div>
+          ))}
+        </div>
+        <EventsMap compact className="lg:col-span-7" />
       </div>
-      <TrackRecordNote className="mt-8 max-w-4xl text-brand-white/80 text-base sm:text-lg leading-relaxed" />
+      <TrackRecordNote className="mt-6 short:mt-4 max-w-4xl text-brand-white/80 text-sm sm:text-base leading-relaxed" />
     </>
   )
 }
@@ -2512,6 +2623,10 @@ export default function App() {
                   <p className="text-brand-gray text-[10px] md:text-[11px] uppercase tracking-[0.14em] sm:tracking-[0.2em] leading-snug">{l}</p>
                 </div>
               ))}
+            </div>
+            <div data-anim style={anim} className="glass rounded-3xl p-6 sm:p-9 mt-5">
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-yellow/90 mb-5">Where we have built events</p>
+              <EventsMap />
             </div>
             <TrackRecordNote data-anim style={anim} className="text-brand-gray text-sm mt-7 max-w-3xl leading-relaxed" />
           </div>

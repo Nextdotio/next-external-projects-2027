@@ -73,7 +73,8 @@ Confirm it prints `Published` before reporting done.
 - **Two printables**, both generated client-side into a print window:
   `downloadBrochurePDF()` (hero + footer) and `downloadBriefPDF(brief)` (brief builder).
 - Claims are pitched at the conservative end on purpose: 13 partner-hosted events
-  since 2024, 5 cities. The 800+ figure is different in kind - it is the founders'
+  since 2024, and the 7 cities where we have hosted events for partners (Stuart, 29 Sep
+  2026, adding Lisbon and Las Vegas; see README.md). The 800+ figure is different in kind - it is the founders'
   lifetime output since Events by Martin, across two decades and the whole business,
   not partner-hosted events. Keep the two clearly separated wherever they appear. The
   reasoning is in README.md — do not round them up.
@@ -193,3 +194,52 @@ every product."
 - **Polish in the same pass:** the brief summary's small print before a format is
   picked now follows the formats on offer (each carries a fixed fee), where it used to
   say the figure "moves with guest numbers".
+
+
+## Proof on a map, less repetition, a price across the range (29 Sep 2026)
+
+Stuart: "highlight some of those cities as well on a map" (Rome, Barcelona, Malta,
+London, Lisbon, Florida, Vegas, the summit in New York, the retreats in Cancún and
+Cyprus: "proof points of how amazing we are at putting on events for the industry, and
+especially senior people"); "we repeat the 75% number twice ... highlight other segments
+that are performing"; the "what it does not cover" section "should more be about the
+opportunity ... flip it around and present it as a positive"; "reducing" repetition ("one
+host" paragraphs, the honest-report wording); "the cancellation terms probably need to be
+a little bit clearer"; and in the brief builder, "the price should at least have an
+approximation" across 60 to 350 guests, "clearer that it's an approximation", with the
+quote confirming it.
+
+- **The map.** `EventsMap` (App.jsx) draws `src/worldmap.js`, a dot grid built with the
+  hub's method from Natural Earth 1:50m land, widened west to take in Las Vegas (longitude
+  -127 to 42). `EVENT_CITIES` holds each city, its kinds (`partner`, `summit`, `retreat`;
+  Malta is partner and summit) and its label side. Filled pins are partner-hosted cities,
+  rings are NEXT.io's own summits and retreats. Names sit on the map from md up; below md,
+  and for screen readers, the list under the map names every city by kind. It sits under
+  the track record figures on the page and beside them on the Track record slide. The
+  track record's city count is `HOSTED_CITIES.length`, so the figure follows the pins.
+- **Said once.** The 75% C-level target lives in the room's stats (and the printed
+  brochure's room paragraph), no longer in the hero chips, the track record or the FAQ.
+  "One host per event" is the hero chip and the first pillar only, not a term or a room
+  stat. "NEXT.io is the organiser" is the term only. The honest-report wording is the
+  report section's; the room step says "We report back" and the FAQ answers a short room
+  with the week-two review.
+- **The report's other half** (`PIPELINE`) is "What happens next: Your opportunities":
+  we create the opportunity, you close it. The printed brochure reads the same constant.
+- **Cancellation, step by step** says what the contract does: nothing owed before
+  signature; signature and the deposit hold the venue and suppliers; charges rise at set
+  dates after that; the contract lists every date and amount before it is signed. If
+  Legal or Finance publish the schedule itself, put the dates and amounts here.
+- **The approximation.** `perExtra: 180` on the format and `approxFee` / `approxFigure`:
+  the starting fee plus about €180 a guest beyond the 60 it covers (the reception's
+  per-guest rate in the old delivered-event model), times the off-calendar premium where
+  it applies, rounded to the thousand: about €90,000 at 200, €117,000 at 350. It shows
+  under the slider, in the brief summary ("Approximate fee for N guests"), in the fee
+  block ("roughly €117,000 at 350, an approximation"), in `feeScope`, the mailto and both
+  PDFs, and every one says it is an approximation that the quote confirms. Drop
+  `perExtra` and every place falls back to "quoted on the brief".
+- **Client logos: not yet.** Stuart asked for logos of the companies we have hosted for
+  (Altenar, maybe more). The rule above stands: naming a client needs their written
+  permission. Altenar's logo already exists in the sibling sites (Valletta partners,
+  next-2027/logo-src/partners); add a logo row once permission is confirmed.
+- The Format slide scrolled 22px at 1280x800 before these changes (measured with Inter
+  loaded); it still does.

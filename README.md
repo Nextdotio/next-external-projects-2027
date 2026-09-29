@@ -63,8 +63,20 @@ of these with us across four cities"). Get written permission before naming anyo
 
 - **13 events since 2024** — the deck's own records disagree (13 v 14, unresolved,
   Richard to reconcile by 15 Dec). The page claims the lower figure on purpose.
-- **5 host cities** — Rome, Barcelona, Malta, London and SBC Summit Americas in Florida.
-  Lisbon is pipeline, not delivered, so it is not counted.
+- **7 cities where we have hosted events for partners** — Rome, Barcelona, Malta, London,
+  Florida (SBC Summit Americas), Lisbon and Las Vegas. Stuart added Lisbon and Las Vegas on
+  29 Sep 2026 ("we've done things like Rome, Barcelona, Malta, London, Lisbon, Florida,
+  Vegas"); the deck had Lisbon as pipeline and did not list Las Vegas, so confirm both with
+  him if the deck is ever the only source. The count on the page is derived from the map's
+  `EVENT_CITIES`, so it cannot drift from the pins.
+- **The map** also shows NEXT.io's own summits (New York, Valletta) and retreats (Cyprus,
+  Cancún), in their own pin style: they are proof of the team, not partner-hosted events.
+- **+69 partner NPS** — NEXT Summit Valletta 2026, as the Valletta card reports it (the
+  +27 benchmark is the survey platform's own column).
+- **About €180 a guest beyond 60** — the Drinks Reception's per-guest rate (food and
+  drink) in the delivered-event model this page priced from until 17 Sep (base €24,200 +
+  €180 a guest). It drives the approximation shown across the 60 to 350 range, always
+  labelled approximate. It is `perExtra` on the format; confirm or change it with Stuart.
 - **300 guests / 75% C-level / 80% of criteria** — the standards Relationships commits
   to, not measured outcomes. Worded as targets throughout.
 
