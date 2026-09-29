@@ -194,6 +194,9 @@ every product."
 - iGaming always renders with a lowercase i, including inside uppercase elements (Stuart, 29 Sep 2026).
   `brandCase` keeps it cased on the page and in the deck; in a print template, wrap
   it in a span with `text-transform:none`, as `.logo .io` does for NEXT.io.
+  `brandCase` also keeps iGB cased (iGB Live, the organiser's own spelling): the
+  calendar row titles, the slot slides and the slot labels the deck's Next button
+  and slide list show all go through it.
 - **Polish in the same pass:** the brief summary's small print before a format is
   picked now follows the formats on offer (each carries a fixed fee), where it used to
   say the figure "moves with guest numbers".

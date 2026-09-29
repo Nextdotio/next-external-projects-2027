@@ -68,9 +68,10 @@ const feeScope = (f) => (f.fee != null
   : `${f.min} guests to ${f.max} guests · about €${f.perGuest} a guest either way`)
 
 // House rule: NEXT.io and NEXTPredict keep their own casing, even inside a heading
-// that CSS sets in capitals (never NEXT.IO), and so does iGaming (never IGAMING).
+// that CSS sets in capitals (never NEXT.IO), and so do iGaming (never IGAMING)
+// and iGB, the iGB Live organiser's own spelling (never IGB).
 // Wrap data strings that render uppercase.
-const brandCase = (s) => String(s).split(/(NEXT\.io|NEXTPredict|iGaming)/).map((part, i) =>
+const brandCase = (s) => String(s).split(/(NEXT\.io|NEXTPredict|iGaming|\biGB\b)/).map((part, i) =>
   (i % 2 ? <span key={i} className="normal-case">{part}</span> : part))
 
 // ─── 2027 calendar ────────────────────────────────────────────────────────
@@ -1647,7 +1648,7 @@ function SlotRow({ s, i, chosen, onChoose, onPresent }) {
 
         <span className="col-start-2 row-start-1 min-w-0 md:self-end xl:self-center">
           <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-            <span className="text-lg sm:text-xl font-bold uppercase leading-tight tracking-tight">{s.name}</span>
+            <span className="text-lg sm:text-xl font-bold uppercase leading-tight tracking-tight">{brandCase(s.name)}</span>
             {isPremium && (
               <span className="text-[9px] font-bold uppercase tracking-[0.15em] tabular-nums text-brand-champagne border border-brand-yellow/50 rounded-full px-2 py-0.5">
                 +{Math.round(s.premium * 100)}%
@@ -1680,8 +1681,8 @@ function SlotRow({ s, i, chosen, onChoose, onPresent }) {
             }`}
           >
             {chosen
-              ? <><CircleCheck className="w-3.5 h-3.5" aria-hidden="true" />In your brief<span className="sr-only">: {s.name}</span></>
-              : <>Start a brief<span className="sr-only"> for {s.name}</span><ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden="true" /></>}
+              ? <><CircleCheck className="w-3.5 h-3.5" aria-hidden="true" />In your brief<span className="sr-only">: {brandCase(s.name)}</span></>
+              : <>Start a brief<span className="sr-only"> for {brandCase(s.name)}</span><ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden="true" /></>}
           </button>
         </span>
       </div>
@@ -1859,7 +1860,7 @@ function buildSlides(hasBrief) {
     ...(FORMATS.length > 1 ? [{ id: 'formats', label: 'The formats', group: formatGroup, kind: 'formats' }] : []),
     ...FORMATS.map((f) => ({ id: formatSlideId(f), label: f.name, group: formatGroup, kind: 'format', f })),
     { id: 'calendar', label: 'The 2027 calendar', group: 'The 2027 calendar', kind: 'calendar' },
-    ...SUMMITS.map((s) => ({ id: `slot-${s.id}`, label: s.name, group: 'The 2027 calendar', kind: 'slot', s })),
+    ...SUMMITS.map((s) => ({ id: `slot-${s.id}`, label: brandCase(s.name), group: 'The 2027 calendar', kind: 'slot', s })),
     { id: 'the-room', label: 'The room', group: 'How it works', kind: 'room' },
     { id: 'how-it-works', label: 'Twelve weeks', group: 'How it works', kind: 'build' },
     { id: 'report', label: 'Your report', group: 'How it works', kind: 'report' },
@@ -2121,7 +2122,7 @@ function CalendarSlide({ goId, brief }) {
             >
               <DateTile s={s} chosen={brief.summit === s.id} />
               <span className="min-w-0 flex-1 flex flex-col gap-1">
-                <span className="font-bold uppercase tracking-tight leading-tight group-hover:text-brand-yellow transition-colors">{s.name}</span>
+                <span className="font-bold uppercase tracking-tight leading-tight group-hover:text-brand-yellow transition-colors">{brandCase(s.name)}</span>
                 <span className="text-xs text-brand-gray">{s.city}</span>
                 <span className={`sm:mt-auto sm:pt-2 text-[9px] font-bold uppercase tracking-[0.14em] tabular-nums ${SLOT_TONE[s.status]}`}>
                   {s.premium > 0 ? `+${Math.round(s.premium * 100)}%` : STATUS_STYLE[s.status].label}
@@ -2153,7 +2154,7 @@ function SlotSlide({ s, inBrief, onAdd, landOn }) {
         <div className="mt-5 flex items-center gap-5 sm:gap-7">
           <DateTile s={s} chosen={inBrief} size="large" />
           <div className="min-w-0">
-            <h2 className="text-[2rem] sm:text-5xl lg:text-[3.25rem] font-bold uppercase tracking-tight leading-[1.02]">{s.name}</h2>
+            <h2 className="text-[2rem] sm:text-5xl lg:text-[3.25rem] font-bold uppercase tracking-tight leading-[1.02]">{brandCase(s.name)}</h2>
             {pct > 0 && (
               <span className="inline-block mt-3 text-[10px] font-bold uppercase tracking-[0.15em] tabular-nums text-brand-champagne border border-brand-yellow/50 rounded-full px-2.5 py-1">
                 +{pct}%
